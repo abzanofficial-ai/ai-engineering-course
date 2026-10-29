@@ -1,0 +1,226 @@
+# Design system
+
+Owner: Senior UI/UX Designer. Principles: **the book is the product** (typography first, chrome second), **calm** (no gamified noise), **mobile first**, **WCAG 2.2 AA by construction**.
+
+## 1. Foundations
+
+### Typography
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--font-body` | System UI stack (`ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, …`) | All text — no web-font download, no font-swap layout shift |
+| `--font-mono` | `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace` | Code |
+| Body size | 1.0625rem (17px) mobile, 1.125rem (18px) ≥ 768px; line-height 1.7 | Reader |
+| Measure | `max-width: 68ch` for prose | Reader |
+| Scale | 1.25 ratio: h1 2.1rem, h2 1.6rem, h3 1.3rem, h4 1.1rem | Headings |
+
+### Colour tokens (light / dark). All text pairs ≥ 4.5:1, UI boundaries ≥ 3:1
+
+| Token | Light | Dark | Use |
+| --- | --- | --- | --- |
+| `--bg` | `#ffffff` | `#0f1115` | Page |
+| `--surface` | `#f6f7f9` | `#171a21` | Cards, code |
+| `--text` | `#1a1d23` | `#e6e8ec` | Body (16.9:1 / 14.9:1) |
+| `--muted` | `#555b66` | `#a3a9b5` | Secondary text (7.0:1 / 7.6:1) |
+| `--border` | `#8a909b` | `#5c6370` | Inputs, dividers that matter (3.3:1 / 3.1:1) |
+| `--hairline` | `#e3e6ea` | `#2a2f38` | Decorative dividers only |
+| `--accent` | `#1d4ed8` | `#8ab4ff` | Links, primary buttons (6.7:1 / 8.4:1) |
+| `--accent-fg` | `#ffffff` | `#0f1115` | Text on accent |
+| `--success` | `#166534` | `#6ee7a0` | Completed |
+| `--warning` | `#8a4b00` | `#ffc46b` | Unsure / due |
+| `--focus` | `#c2410c` | `#ffb38a` | Focus ring (3px solid + 2px offset) |
+| `--placeholder-bg` | `#fff4c2` | `#4a3f12` | `[placeholder]` highlight in prompts |
+
+Theme = system preference by default, overridable (Light / Dark / System) in the header; stored in a cookie-free `localStorage` key and applied by an inline script before paint (no flash). Code uses Shiki dual themes (`github-light` / `github-dark`) via CSS variables; diagrams swap SVG per theme.
+
+### Space, shape, motion
+
+- Spacing scale 4px base: 4, 8, 12, 16, 24, 32, 48, 64.
+- Radius 8px cards, 6px controls. Touch targets ≥ 44×44px (WCAG 2.5.8 needs 24; we go further on mobile).
+- Motion: 150 ms ease-out for disclosure/flip; all disabled under `prefers-reduced-motion: reduce`.
+
+### Components (shadcn/ui-style on Radix primitives where interactive)
+
+Button (primary/secondary/ghost), Checkbox (lab step), Disclosure (When it breaks, drill reveal, diagram text), Tooltip/Popover (glossary term — popover on tap, tooltip on hover+focus, dismissible with Esc), Dialog (delete account, search), Tabs (quiz modes), Progress bar (with text label "4 of 12"), Toast (save status, polite live region), Badge ("Coming soon", "Lab", "Unsure").
+
+### Accessibility rules every component follows
+
+- Visible focus ring on everything focusable; never `outline: none` without replacement. Focus not obscured by sticky header (`scroll-padding-top`).
+- One `h1` per page; heading levels follow the book (`##`→h1 on chapter page, `###`→h2, `####`→h3).
+- Skip link to main content; landmarks (`header`, `nav`, `main`, `aside`, `footer`).
+- State is never colour alone: completed has a ✓ icon + text; unsure has a label.
+- Diagrams: alt text + "Diagram as text" disclosure. Code blocks: language label announced, copy button labelled "Copy bash code"; result announced ("Copied").
+- Save status uses `aria-live="polite"`.
+- Dragging is never required (WCAG 2.5.7). No timeouts on drill/quiz.
+
+## 2. Layout
+
+- **Mobile (< 768px):** single column. Header: menu, course title, search icon, theme, account. TOC in a "On this page" sheet opened from a sticky bottom bar that also holds prev/next.
+- **Tablet (768–1199px):** content column + collapsible TOC.
+- **Desktop (≥ 1200px):** three columns — chapter nav (left, collapsible), content (68ch), sticky TOC + progress (right).
+
+## 3. Wireframes (text)
+
+### 3.1 Course home
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│ ☰  The AI Engineering Handbook            🔍   ◐   (Account) │
+├───────────────────────────────────────────────────────────────┤
+│ Welcome back, Sam                                             │
+│ ┌───────────────────────────────────────────────────────────┐ │
+│ │ CONTINUE WHERE YOU LEFT OFF                               │ │
+│ │ Ch 21 · Tool Calling & Function Calling                   │ │
+│ │ Practice lab — step 4 of 9          [ Continue → ]        │ │
+│ └───────────────────────────────────────────────────────────┘ │
+│ Course progress  ███████░░░░░░░░  11 of 29 chapters           │
+│ Review due: 6 cards  [Start review]                           │
+│                                                               │
+│ START HERE                                                    │
+│  • How to use this book  ✓     • The capstone                 │
+│                                                               │
+│ PART 1 — Programming Foundation        4/4 ✓  [Certificate]   │
+│  ✓ 1 Python for AI Engineering    25 min read · 45 min lab    │
+│  ✓ 2 Git & GitHub                 …                           │
+│ PART 2 — Mathematics & Data Basics     1/2                    │
+│  ✓ 5 Statistics & Linear Algebra                              │
+│  ◐ 6 NumPy & Pandas               (half-filled = in progress) │
+│ …                                                             │
+│ PART 11 — Evaluation & Safety          [Coming soon]          │
+│  31 Eval-driven development       Coming soon (not a link)    │
+└───────────────────────────────────────────────────────────────┘
+```
+Signed-out: same layout, no personal rows, a "Create a free account" card; Start here and Chapter 1 readable.
+
+### 3.2 Chapter reader
+
+```
+Desktop                                                  
+┌──────────┬──────────────────────────────────┬──────────────┐
+│ Part 9   │ Part 9 · Chapter 21              │ ON THIS PAGE │
+│  21 ●    │ Tool Calling & Function Calling  │ Jargon       │
+│  22      │ 22 min read · lab ~60 min        │ What it is   │
+│  23      │ ┌──────────────────────────────┐ │ How it works │
+│ …        │ │ Definition: you describe …   │ │ ▸ Practice   │
+│          │ └──────────────────────────────┘ │   lab  3/9   │
+│          │ ## Jargon decoder (table, terms   │ Decision     │
+│          │    searchable in glossary)        │   drill ✓    │
+│          │ ## What it is …  a ‧tool‧ (dotted │ …            │
+│          │    underline = glossary popover)  │──────────────│
+│          │ ```python  [python] [Copy]       │ Chapter 40%  │
+│          │ [diagram img]  ▸ Diagram as text  │ 🔖 Bookmark  │
+│          │ Each section footer:              │ 📝 Notes (2) │
+│          │   [🔖] [📝 Add note]              │              │
+│          │ ← Ch 20 Tracing   Ch 22 Agents → │              │
+└──────────┴──────────────────────────────────┴──────────────┘
+Mobile: single column; bottom bar [☰ On this page] [← ] [ →]
+```
+
+### 3.3 Lab checklist
+
+```
+## Practice lab: the Harbour & Finch viewing assistant
+What you'll build: …            Time: about 60 minutes
+Progress ███░░░░  3 of 9 steps                       Saved ✓
+┌────────────────────────────────────────────────────────────┐
+│ [✓] Step 1 — Set up                                        │
+│     (step content; code blocks with Copy)                  │
+│ [✓] Step 2 — …                                             │
+│ [ ] Step 3 — …                                             │
+│ …                                                          │
+│ ▸ When it breaks (5 known problems)   ← disclosure          │
+│ Commit it                                                  │
+│   ```bash $ git add . …```  [Copy commands]                │
+│ ┌────────────────────────────────────────────────────────┐ │
+│ │ [ I committed it ]  ← primary; becomes "Committed ✓    │ │
+│ │                      on 3 Nov · Undo"                  │ │
+│ └────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────┘
+```
+Checkbox label is the step title; the whole heading row is the hit target. Ticking does not collapse content.
+
+### 3.4 Decision drill
+
+```
+## Decision drill: "just give it access to our whole CRM"
+The scenario. …
+What to ask: 1… 2… 3…
+┌────────────────────────────────────────────────────────────┐
+│ Your answer (private — only you can see it)                │
+│ ┌────────────────────────────────────────────────────────┐ │
+│ │ What would you ask, and what would you recommend?      │ │
+│ │                                                        │ │
+│ └────────────────────────────────────────────────────────┘ │
+│ Saved as you type ✓                                        │
+│ [ Compare with an experienced engineer ]  (enabled once    │
+│    ≥ 20 characters)        or  "Skip and reveal" (link)    │
+└────────────────────────────────────────────────────────────┘
+After reveal (two columns ≥ 1024px, stacked on mobile):
+┌──────────────── Your answer ─────┬── How an experienced engineer reasons ──┐
+│ (read-only, [Edit])              │ … What to tell the client … Where this  │
+│                                  │ crosses departments …                   │
+└──────────────────────────────────┴─────────────────────────────────────────┘
+```
+Focus moves to the revealed heading; announced via live region.
+
+### 3.5 Quiz / flashcard mode
+
+```
+Interview practice — Chapter 21           Card 3 of 8   [Review due: 6]
+┌────────────────────────────────────────────────────────────┐
+│  "Read tools and write tools — what's the difference, and  │
+│   why does it matter for approval gates?"                  │
+│                                                            │
+│  Your answer (optional, private)                           │
+│  [                                                       ] │
+│                                                            │
+│  [ Show where the chapter covers this ]                    │
+│      → links: Read tools and write tools… · What goes wrong│
+│                                                            │
+│  How did you do?   [ Unsure ]   [ Confident ]              │
+└────────────────────────────────────────────────────────────┘
+Keyboard: 1 = Unsure, 2 = Confident (shown as hints).
+Modes (tabs): This chapter · Review due (all unsure/due) · All chapters
+```
+
+### 3.6 Dashboard (`/dashboard`)
+
+```
+Your learning
+┌────────────┬────────────┬────────────┬────────────┐
+│ Chapters   │ Labs       │ Drills     │ Cards due  │
+│ 11 / 29    │ 9 / 30     │ 10 / 29    │ 6          │
+└────────────┴────────────┴────────────┴────────────┘
+Continue: Ch 21 · lab step 4                [Continue →]
+Certificates: Part 1 ✓ [View · Copy link]   Part 2 (1 chapter left)
+Bookmarks (list, newest first, link to section)
+Notes (grouped by chapter, search box)
+Account: name on certificates [Sam Patel] · Download my data · Delete account
+```
+
+### 3.7 Admin import
+
+```
+Admin › Content
+Current published: release 2026-10-29 · hash 3fa9c2 · 29 chapters
+[ Choose handbook.md ]  [ Preview changes ]
+┌ Diff preview ──────────────────────────────────────────────┐
+│ + Added chapters (1):   30 AI Product, UX & Feedback Loops │
+│ ~ Changed chapters (3): 18 (2 sections), 21 (lab: +1 step) │
+│ − Removed keys (1):  ch-21 / step-9 — 214 learners have    │
+│                      progress here (kept, will be orphaned)│
+│ ! Renamed headings (1): ch-19 "Measuring retrieval…" →     │
+│                      "Measuring retrieval separately" — 88 │
+│                      learners' 'read' mark for that section│
+│ Coming soon → published: 30                                │
+│ Warnings: 0 parse errors · 2 diagrams without %% alt       │
+└────────────────────────────────────────────────────────────┘
+[ Publish ]  (disabled + CLI instructions if GitHub publish flag/token absent)
+```
+
+## 4. Content formatting rules
+
+- Tables scroll horizontally inside their own container on mobile (page never scrolls sideways), with the first column sticky for jargon tables.
+- Code blocks: language label, copy button, horizontal scroll, `tabindex="0"` for keyboard scrolling. For `bash` blocks with `$ ` prompts, copy takes only the command lines without `$ `.
+- "Stuck? Ask Claude" prompts: each in a card with "Copy prompt"; `[placeholders]` highlighted with `--placeholder-bg` and a legend "Replace the highlighted parts".
+- Coming-soon chapters: muted text, "Coming soon" badge, not links, `aria-disabled` is not used (they are plain text).
