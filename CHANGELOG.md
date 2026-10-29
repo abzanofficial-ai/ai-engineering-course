@@ -4,6 +4,20 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Design revision (after preview feedback)
+
+#### Changed
+
+- Learner experience redesigned from a long-scroll reader to an app-like flow: home is a route
+  map of the 15 parts; each chapter has Learn / Practise / Decide / Review modes
+  (design-system §5).
+
+#### Added (decisions; implementation scheduled in M2–M5)
+
+- ADR-0019 XP, streaks, weekly goal and progress percentages (M2).
+- ADR-0020 opt-in reminder emails (M5).
+- ADR-0021 self-assessed part checkpoints, with a scored question bank as a later option (M3).
+
 ### M1 — Content pipeline and static reader
 
 #### Added

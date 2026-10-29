@@ -203,6 +203,8 @@ erDiagram
     }
 ```
 
+Engagement (ADR-0019–0021): `xp_event` (PK `user_id, course, event_id` — idempotent awards), `activity_day`, `user_settings` (weekly goal, timezone), `reminder_pref`, `checkpoint_attempt`.
+
 Also: `last_position` (continue where you left off), `feature_flag`, `content_release`, `rate_limit_bucket`, `admin_audit`, and Better Auth's `verification`. All personal tables have composite primary keys starting with `user_id`, giving natural upserts (idempotent writes) and an index for every per-user query. Full DDL is in `src/server/db/schema.ts`.
 
 ### Entitlements (ADR-0010)

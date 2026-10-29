@@ -1,6 +1,6 @@
 # Design system
 
-Owner: Senior UI/UX Designer. Principles: **the book is the product** (typography first, chrome second), **calm** (no gamified noise), **mobile first**, **WCAG 2.2 AA by construction**.
+Owner: Senior UI/UX Designer. Principles: **the book is the product** (typography first, chrome second), **motivating, not manipulative** (XP, streaks and goals reward real work; no leaderboards or loss-aversion tricks, ADR-0019), **mobile first**, **WCAG 2.2 AA by construction**.
 
 ## 1. Foundations
 
@@ -227,3 +227,41 @@ Current published: release 2026-10-29 · hash 3fa9c2 · 29 chapters
 - Code blocks: language label, copy button, horizontal scroll, `tabindex="0"` for keyboard scrolling. For `bash` blocks with `$ ` prompts, copy takes only the command lines without `$ `.
 - "Stuck? Ask Claude" prompts: each in a card with "Copy prompt"; `[placeholders]` highlighted with `--placeholder-bg` and a legend "Replace the highlighted parts".
 - Coming-soon chapters: muted text, "Coming soon" badge, not links, `aria-disabled` is not used (they are plain text).
+
+## 5. Revision 2 — app-like learning experience (owner feedback: "it looks like another PDF")
+
+The reader no longer presents a chapter as one long page. Approved in the phone preview.
+
+### 5.1 Home = the route
+
+- Hero: course title, one-line promise, live counts (chapters, lab steps, drills, interview questions), course % complete, streak and weekly-goal ring, and one primary "Continue where you left off" button.
+- **Your route:** the 15 parts as stops on a vertical line, each part with its own hue along the route (teal → blue → violet → magenta → orange). Each stop shows the book's own "You can now…" outcome from the Index, a progress ring with the % as text, and milestone flags where the Index marks one in bold (Part 8 "First sellable product", Part 13 "Pass the system design round").
+- Chapter cards under each stop: number, title, reading/lab time, progress ring. Coming-soon chapters are muted text with a badge.
+- **Part checkpoint** card at the end of each part with published chapters (ADR-0021).
+
+### 5.2 Chapter = four modes
+
+Tinted header in the part's hue: eyebrow (Part · title), chapter title, definition as the lede, chips (read time, lab steps and time, key terms, questions), chapter % bar.
+
+Sticky mode tabs, each with an icon, a colour and a progress label:
+
+| Mode     | Colour token         | Contains                                                                                                                           |
+| -------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Learn    | `--learn` (blue)     | One section per card, "Got it · next", numbered section dots; Jargon decoder as tap-to-reveal term cards                           |
+| Practise | `--practise` (green) | Lab checklist (tick opens the next step), progress ring, collapsible "When it breaks", "I committed it", Stuck? Ask Claude prompts |
+| Decide   | `--decide` (amber)   | Scenario → private answer (≥ 20 chars) → side-by-side comparison with the expert reasoning                                         |
+| Review   | `--review` (violet)  | Flashcards, Unsure / Confident, "practise only unsure"                                                                             |
+
+### 5.3 Engagement (ADR-0019, 0020)
+
+- Top bar: streak (flame icon + days) and XP (star icon + total) as one tappable chip opening **Your progress**.
+- "+10 XP" toast (polite live region, no animation under reduced motion).
+- **Your progress** page: course %, per-part %, XP total and this week, streak with freezes, weekly-goal ring and stepper (1–7 days), recent activity, and **Reminders** switches (all off by default, with the consent wording "Email me…" and "Unsubscribe any time").
+
+### 5.4 Part checkpoint (ADR-0021)
+
+Intro (rules: 10 questions + 1 drill, pass at 80 % confident) → one question per card with elapsed time, Unsure / Confident → drill → result: pass (200 XP, certificate status) or "not yet" with links to the chapters behind each unsure question, and Try again.
+
+### 5.5 Typography update
+
+Display face: Bricolage Grotesque (self-hosted via `next/font`, weights 600/800, used for headings and numbers only); body remains the system stack for speed.
