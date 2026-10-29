@@ -6,30 +6,30 @@ Owner: Senior UI/UX Designer. Principles: **the book is the product** (typograph
 
 ### Typography
 
-| Token | Value | Use |
-| --- | --- | --- |
+| Token         | Value                                                                              | Use                                                        |
+| ------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------- |
 | `--font-body` | System UI stack (`ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, …`) | All text — no web-font download, no font-swap layout shift |
-| `--font-mono` | `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace` | Code |
-| Body size | 1.0625rem (17px) mobile, 1.125rem (18px) ≥ 768px; line-height 1.7 | Reader |
-| Measure | `max-width: 68ch` for prose | Reader |
-| Scale | 1.25 ratio: h1 2.1rem, h2 1.6rem, h3 1.3rem, h4 1.1rem | Headings |
+| `--font-mono` | `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`                         | Code                                                       |
+| Body size     | 1.0625rem (17px) mobile, 1.125rem (18px) ≥ 768px; line-height 1.7                  | Reader                                                     |
+| Measure       | `max-width: 68ch` for prose                                                        | Reader                                                     |
+| Scale         | 1.25 ratio: h1 2.1rem, h2 1.6rem, h3 1.3rem, h4 1.1rem                             | Headings                                                   |
 
 ### Colour tokens (light / dark). All text pairs ≥ 4.5:1, UI boundaries ≥ 3:1
 
-| Token | Light | Dark | Use |
-| --- | --- | --- | --- |
-| `--bg` | `#ffffff` | `#0f1115` | Page |
-| `--surface` | `#f6f7f9` | `#171a21` | Cards, code |
-| `--text` | `#1a1d23` | `#e6e8ec` | Body (16.9:1 / 14.9:1) |
-| `--muted` | `#555b66` | `#a3a9b5` | Secondary text (7.0:1 / 7.6:1) |
-| `--border` | `#8a909b` | `#5c6370` | Inputs, dividers that matter (3.3:1 / 3.1:1) |
-| `--hairline` | `#e3e6ea` | `#2a2f38` | Decorative dividers only |
-| `--accent` | `#1d4ed8` | `#8ab4ff` | Links, primary buttons (6.7:1 / 8.4:1) |
-| `--accent-fg` | `#ffffff` | `#0f1115` | Text on accent |
-| `--success` | `#166534` | `#6ee7a0` | Completed |
-| `--warning` | `#8a4b00` | `#ffc46b` | Unsure / due |
-| `--focus` | `#c2410c` | `#ffb38a` | Focus ring (3px solid + 2px offset) |
-| `--placeholder-bg` | `#fff4c2` | `#4a3f12` | `[placeholder]` highlight in prompts |
+| Token              | Light     | Dark      | Use                                          |
+| ------------------ | --------- | --------- | -------------------------------------------- |
+| `--bg`             | `#ffffff` | `#0f1115` | Page                                         |
+| `--surface`        | `#f6f7f9` | `#171a21` | Cards, code                                  |
+| `--text`           | `#1a1d23` | `#e6e8ec` | Body (16.9:1 / 14.9:1)                       |
+| `--muted`          | `#555b66` | `#a3a9b5` | Secondary text (7.0:1 / 7.6:1)               |
+| `--border`         | `#8a909b` | `#5c6370` | Inputs, dividers that matter (3.3:1 / 3.1:1) |
+| `--hairline`       | `#e3e6ea` | `#2a2f38` | Decorative dividers only                     |
+| `--accent`         | `#1d4ed8` | `#8ab4ff` | Links, primary buttons (6.7:1 / 8.4:1)       |
+| `--accent-fg`      | `#ffffff` | `#0f1115` | Text on accent                               |
+| `--success`        | `#166534` | `#6ee7a0` | Completed                                    |
+| `--warning`        | `#8a4b00` | `#ffc46b` | Unsure / due                                 |
+| `--focus`          | `#c2410c` | `#ffb38a` | Focus ring (3px solid + 2px offset)          |
+| `--placeholder-bg` | `#fff4c2` | `#4a3f12` | `[placeholder]` highlight in prompts         |
 
 Theme = system preference by default, overridable (Light / Dark / System) in the header; stored in a cookie-free `localStorage` key and applied by an inline script before paint (no flash). Code uses Shiki dual themes (`github-light` / `github-dark`) via CSS variables; diagrams swap SVG per theme.
 
@@ -90,12 +90,13 @@ Button (primary/secondary/ghost), Checkbox (lab step), Disclosure (When it break
 │  31 Eval-driven development       Coming soon (not a link)    │
 └───────────────────────────────────────────────────────────────┘
 ```
+
 Signed-out: same layout, no personal rows, a "Create a free account" card; Start here and Chapter 1 readable.
 
 ### 3.2 Chapter reader
 
-```
-Desktop                                                  
+````
+Desktop
 ┌──────────┬──────────────────────────────────┬──────────────┐
 │ Part 9   │ Part 9 · Chapter 21              │ ON THIS PAGE │
 │  21 ●    │ Tool Calling & Function Calling  │ Jargon       │
@@ -114,11 +115,11 @@ Desktop
 │          │ ← Ch 20 Tracing   Ch 22 Agents → │              │
 └──────────┴──────────────────────────────────┴──────────────┘
 Mobile: single column; bottom bar [☰ On this page] [← ] [ →]
-```
+````
 
 ### 3.3 Lab checklist
 
-```
+````
 ## Practice lab: the Harbour & Finch viewing assistant
 What you'll build: …            Time: about 60 minutes
 Progress ███░░░░  3 of 9 steps                       Saved ✓
@@ -136,7 +137,8 @@ Progress ███░░░░  3 of 9 steps                       Saved ✓
 │ │                      on 3 Nov · Undo"                  │ │
 │ └────────────────────────────────────────────────────────┘ │
 └────────────────────────────────────────────────────────────┘
-```
+````
+
 Checkbox label is the step title; the whole heading row is the hit target. Ticking does not collapse content.
 
 ### 3.4 Decision drill
@@ -161,6 +163,7 @@ After reveal (two columns ≥ 1024px, stacked on mobile):
 │                                  │ crosses departments …                   │
 └──────────────────────────────────┴─────────────────────────────────────────┘
 ```
+
 Focus moves to the revealed heading; announced via live region.
 
 ### 3.5 Quiz / flashcard mode

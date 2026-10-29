@@ -1,0 +1,6 @@
+content/handbook.md
+pnpm-lock.yaml
+.content
+.cache
+public/pagefind
+public/diagrams

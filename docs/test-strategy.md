@@ -4,29 +4,29 @@ Owner: Senior SDET & QA Lead. Rule: **nothing merges without the tests that prov
 
 ## 1. Risk-based priorities
 
-| Risk | Impact | Primary defence |
-| --- | --- | --- |
-| A learner reads or changes another learner's data | Severe (privacy breach) | Isolation test suite against a real Postgres (§4) |
-| Re-import loses or scrambles progress | Severe (trust) | Importer golden + idempotency + key-stability tests |
-| Parser mis-reads the book (wrong sections, broken labs/drills) | High | Fixture tests from real handbook edge cases + full-file structural assertions |
-| Drill reveal leaks before answering | Medium | Unit + e2e |
-| Progress lost when offline | High | Outbox unit tests + Playwright offline e2e |
-| Accessibility regressions | High (WCAG 2.2 AA is a requirement) | axe on every page type, keyboard e2e |
-| Performance regressions (LCP, CLS) | Medium | Lighthouse CI budget on reader pages; k6 for APIs |
-| Auth abuse | High | Rate-limit tests, magic-link single-use/expiry tests |
+| Risk                                                           | Impact                              | Primary defence                                                               |
+| -------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------- |
+| A learner reads or changes another learner's data              | Severe (privacy breach)             | Isolation test suite against a real Postgres (§4)                             |
+| Re-import loses or scrambles progress                          | Severe (trust)                      | Importer golden + idempotency + key-stability tests                           |
+| Parser mis-reads the book (wrong sections, broken labs/drills) | High                                | Fixture tests from real handbook edge cases + full-file structural assertions |
+| Drill reveal leaks before answering                            | Medium                              | Unit + e2e                                                                    |
+| Progress lost when offline                                     | High                                | Outbox unit tests + Playwright offline e2e                                    |
+| Accessibility regressions                                      | High (WCAG 2.2 AA is a requirement) | axe on every page type, keyboard e2e                                          |
+| Performance regressions (LCP, CLS)                             | Medium                              | Lighthouse CI budget on reader pages; k6 for APIs                             |
+| Auth abuse                                                     | High                                | Rate-limit tests, magic-link single-use/expiry tests                          |
 
 ## 2. Test pyramid and tools
 
-| Layer | Tool | Scope | Runs |
-| --- | --- | --- | --- |
-| Static | ESLint, `tsc --noEmit`, Prettier | All code | Every push |
-| Unit | Vitest | Parser, keying, diff, glossary matcher, Leitner scheduler, outbox, entitlements logic, validation schemas | Every push (< 30 s) |
-| Integration | Vitest + Postgres (Docker/CI service) | Repository layer, API route handlers, isolation, rate limits, export/delete | Every push |
-| End-to-end | Playwright (Chromium; mobile viewport project) | Learner journeys, admin journeys, offline sync | Every PR |
-| Accessibility | `@axe-core/playwright` + keyboard-only scripts | Every page type, light and dark | Every PR |
-| Performance | Lighthouse CI (LCP < 2.5 s on simulated 4G, CLS < 0.1) | Home, chapter, glossary | PR (main pages) |
-| Load | k6 | 2,000 virtual readers + write mix | M6, before launch, and on demand |
-| Security | `pnpm audit`, header assertions, isolation suite, CodeQL | — | Every PR / weekly |
+| Layer         | Tool                                                     | Scope                                                                                                     | Runs                             |
+| ------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Static        | ESLint, `tsc --noEmit`, Prettier                         | All code                                                                                                  | Every push                       |
+| Unit          | Vitest                                                   | Parser, keying, diff, glossary matcher, Leitner scheduler, outbox, entitlements logic, validation schemas | Every push (< 30 s)              |
+| Integration   | Vitest + Postgres (Docker/CI service)                    | Repository layer, API route handlers, isolation, rate limits, export/delete                               | Every push                       |
+| End-to-end    | Playwright (Chromium; mobile viewport project)           | Learner journeys, admin journeys, offline sync                                                            | Every PR                         |
+| Accessibility | `@axe-core/playwright` + keyboard-only scripts           | Every page type, light and dark                                                                           | Every PR                         |
+| Performance   | Lighthouse CI (LCP < 2.5 s on simulated 4G, CLS < 0.1)   | Home, chapter, glossary                                                                                   | PR (main pages)                  |
+| Load          | k6                                                       | 2,000 virtual readers + write mix                                                                         | M6, before launch, and on demand |
+| Security      | `pnpm audit`, header assertions, isolation suite, CodeQL | —                                                                                                         | Every PR / weekly                |
 
 ## 3. The content pipeline (highest-leverage tests)
 

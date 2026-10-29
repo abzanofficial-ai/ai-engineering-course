@@ -1,0 +1,22 @@
+# Local development services (ADR-0003, ADR-0014). Start with: docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: lms
+      POSTGRES_PASSWORD: lms_local_only
+      POSTGRES_DB: lms
+    ports: ["5432:5432"]
+    volumes: [db-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lms"]
+      interval: 2s
+      retries: 20
+
+  mail:
+    # Catches every email locally; open http://localhost:8025 to see magic links.
+    image: axllent/mailpit:v1.21
+    ports: ["1025:1025", "8025:8025"]
+
+volumes:
+  db-data:

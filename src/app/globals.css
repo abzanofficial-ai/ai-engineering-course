@@ -1,0 +1,345 @@
+@import "tailwindcss";
+
+/* Design tokens — docs/design-system.md §1. Light is the default; dark applies from the
+   system preference unless the learner chose light, or when they explicitly chose dark. */
+:root {
+  --bg: #ffffff;
+  --surface: #f6f7f9;
+  --code-bg: #f6f8fa;
+  --text: #1a1d23;
+  --muted: #555b66;
+  --border: #8a909b;
+  --hairline: #e3e6ea;
+  --accent: #1d4ed8;
+  --accent-fg: #ffffff;
+  --success: #166534;
+  --warning: #8a4b00;
+  --focus: #c2410c;
+  --placeholder-bg: #fff4c2;
+  --font-body:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --header-h: 3.5rem;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115;
+    --surface: #171a21;
+    --code-bg: #0d1117;
+    --text: #e6e8ec;
+    --muted: #a3a9b5;
+    --border: #5c6370;
+    --hairline: #2a2f38;
+    --accent: #8ab4ff;
+    --accent-fg: #0f1115;
+    --success: #6ee7a0;
+    --warning: #ffc46b;
+    --focus: #ffb38a;
+    --placeholder-bg: #4a3f12;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --code-bg: #0d1117;
+  --text: #e6e8ec;
+  --muted: #a3a9b5;
+  --border: #5c6370;
+  --hairline: #2a2f38;
+  --accent: #8ab4ff;
+  --accent-fg: #0f1115;
+  --success: #6ee7a0;
+  --warning: #ffc46b;
+  --focus: #ffb38a;
+  --placeholder-bg: #4a3f12;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-hairline: var(--hairline);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+html {
+  scroll-padding-top: calc(var(--header-h) + 1rem);
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+@media (min-width: 768px) {
+  body {
+    font-size: 1.125rem;
+  }
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.15em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  background: var(--accent);
+  color: var(--accent-fg);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ---------------------------------------------------------------- Reader prose */
+.prose {
+  max-width: 68ch;
+}
+.prose > * + * {
+  margin-top: 1em;
+}
+.prose p,
+.prose li {
+  overflow-wrap: anywhere;
+}
+.prose h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-top: 1.75em;
+}
+.prose h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 1.5em;
+}
+.prose ul {
+  list-style: disc;
+  padding-left: 1.4em;
+}
+.prose ol {
+  list-style: decimal;
+  padding-left: 1.6em;
+}
+.prose li + li {
+  margin-top: 0.35em;
+}
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.35em;
+}
+.prose a {
+  text-decoration: underline;
+}
+.prose strong {
+  font-weight: 700;
+}
+.prose blockquote {
+  border-left: 4px solid var(--border);
+  padding: 0.25em 0 0.25em 1em;
+  color: var(--text);
+  background: var(--surface);
+  border-radius: 0 6px 6px 0;
+}
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 0.05em 0.3em;
+  overflow-wrap: anywhere;
+}
+.prose hr {
+  border-color: var(--hairline);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+}
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.94em;
+  line-height: 1.5;
+}
+.prose th,
+.prose td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.55em 0.75em;
+  border-bottom: 1px solid var(--hairline);
+  min-width: 8rem;
+}
+.prose thead th {
+  background: var(--surface);
+  font-weight: 700;
+}
+.prose tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Code blocks (Shiki dual theme via CSS variables) */
+figure.code {
+  margin: 1.25em 0 0;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--code-bg);
+  max-width: 100%;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.85rem;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.code-lang {
+  font-family: var(--font-mono);
+}
+.code-copy {
+  display: none;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.js .code-copy {
+  display: inline-block;
+}
+figure.code pre {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  background: transparent !important;
+}
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+}
+:root[data-theme="dark"] .shiki,
+:root[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shiki,
+  :root:not([data-theme="light"]) .shiki span {
+    color: var(--shiki-dark);
+  }
+}
+
+/* Diagrams: one SVG per theme, the hidden one is never downloaded (loading=lazy + display:none) */
+figure.diagram {
+  margin: 1.25em 0 0;
+  padding: 1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--bg);
+  overflow-x: auto;
+}
+figure.diagram img {
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+.diagram-dark {
+  display: none;
+}
+:root[data-theme="dark"] .diagram-light {
+  display: none;
+}
+:root[data-theme="dark"] .diagram-dark {
+  display: block;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .diagram-light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .diagram-dark {
+    display: block;
+  }
+}
+.diagram-source {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  white-space: pre;
+  overflow-x: auto;
+}
+.diagram-text {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.diagram-text summary {
+  cursor: pointer;
+  color: var(--accent);
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+}
+.diagram-text p {
+  margin-top: 0.5rem;
+  color: var(--text);
+}
+
+mark.placeholder {
+  background: var(--placeholder-bg);
+  color: var(--text);
+  font-style: normal;
+  font-weight: 600;
+  border-radius: 3px;
+  padding: 0 0.15em;
+}

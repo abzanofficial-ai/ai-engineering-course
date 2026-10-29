@@ -3,4 +3,5 @@
 - Status: accepted · Date: 2026-10-29 · Decider: Chief Architect (owner approved)
 
 ## Decision
+
 Front matter ("Start here") and Chapter 1 are public and indexable; other chapters and all interactive features require sign-in. Gating is a cheap cookie-presence check in `proxy.ts`, so pages stay edge-cacheable. Free course content is not treated as confidential (search index snippets are public). Personal data and future paid content are confidential and are always authorised server-side.

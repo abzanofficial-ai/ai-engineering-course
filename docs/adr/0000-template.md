@@ -5,6 +5,9 @@
 - Decider: (role)
 
 ## Context
+
 ## Decision
+
 ## Consequences
+
 ## Alternatives considered

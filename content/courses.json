@@ -1,0 +1,10 @@
+{
+  "courses": [
+    {
+      "slug": "ai-engineering-handbook",
+      "source": "content/handbook.md",
+      "product": "course-ai-engineering-handbook",
+      "publicPages": ["start-*", "ch-1"]
+    }
+  ]
+}

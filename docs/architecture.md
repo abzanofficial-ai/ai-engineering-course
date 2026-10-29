@@ -4,14 +4,14 @@ Owner: Chief Architect. Status: accepted for MVP. Decisions referenced as ADR-NN
 
 ## 1. Goals and constraints (summary)
 
-| Driver | What it means for the design |
-| --- | --- |
-| Simple | One deployable app (Next.js) + one database (Postgres). Every other service needs an ADR |
-| Seamless | Content is pre-rendered at build time and served from the edge; personal state hydrates after first paint |
-| Scalable | 100k registered / 2k concurrent readers. Reading a chapter touches **no** database; only writes and personal reads do |
-| Swappable course | Courses are configuration (`content/courses.json` + a Markdown file), never code |
+| Driver           | What it means for the design                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Simple           | One deployable app (Next.js) + one database (Postgres). Every other service needs an ADR                                       |
+| Seamless         | Content is pre-rendered at build time and served from the edge; personal state hydrates after first paint                      |
+| Scalable         | 100k registered / 2k concurrent readers. Reading a chapter touches **no** database; only writes and personal reads do          |
+| Swappable course | Courses are configuration (`content/courses.json` + a Markdown file), never code                                               |
 | Secure / private | Server-side authorisation on every personal-data query, row ownership enforced in one data-access layer, UK GDPR export/delete |
-| Cost | < $50/month at launch (see §10) |
+| Cost             | < $50/month at launch (see §10)                                                                                                |
 
 ## 2. System context
 
@@ -33,16 +33,16 @@ Local development replaces Cloudflare with `next dev`/`next start`, Postgres and
 
 ## 3. Components
 
-| Component | Responsibility | Tech |
-| --- | --- | --- |
-| **Content importer** (`src/content/`) | Parse `handbook.md` → typed course model; assign stable keys; pre-render HTML; render Mermaid; emit glossary, quiz cards, search records; diff against previous release | unified/remark/rehype, Shiki, Mermaid via Playwright (ADR-0006, 0007) |
-| **Generated content** (`.content/<course>/`) | Build output of the importer: `course.json` (structure + keys), per-chapter HTML JSON, diagrams, glossary, cards. Not committed; regenerated every build | JSON + SVG files |
-| **Reader** (`app/(course)/…`) | Statically generated pages: course home, chapter, glossary, search. Personal overlays (progress ticks, notes, answers) load client-side from the API | Next.js App Router, server components, `generateStaticParams` |
-| **Personal API** (`app/api/me/…`, server actions) | Progress, labs, drills, flashcards, notes, bookmarks, certificates, export/delete | Route handlers, Zod validation, Drizzle |
-| **Auth** | Magic link + Google, sessions, rate limits, account deletion | Better Auth (ADR-0005) |
-| **Admin** (`app/admin/…`) | Import diff preview + publish, analytics, flags, entitlements | Server components, role check |
-| **Data access layer** (`src/server/db/`) | The **only** place SQL runs. Every personal query takes `userId` from the session, never from input | Drizzle (ADR-0004) |
-| **Search** | Static, chunked index generated at build | Pagefind custom records (ADR-0008) |
+| Component                                         | Responsibility                                                                                                                                                          | Tech                                                                  |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Content importer** (`src/content/`)             | Parse `handbook.md` → typed course model; assign stable keys; pre-render HTML; render Mermaid; emit glossary, quiz cards, search records; diff against previous release | unified/remark/rehype, Shiki, Mermaid via Playwright (ADR-0006, 0007) |
+| **Generated content** (`.content/<course>/`)      | Build output of the importer: `course.json` (structure + keys), per-chapter HTML JSON, diagrams, glossary, cards. Not committed; regenerated every build                | JSON + SVG files                                                      |
+| **Reader** (`app/(course)/…`)                     | Statically generated pages: course home, chapter, glossary, search. Personal overlays (progress ticks, notes, answers) load client-side from the API                    | Next.js App Router, server components, `generateStaticParams`         |
+| **Personal API** (`app/api/me/…`, server actions) | Progress, labs, drills, flashcards, notes, bookmarks, certificates, export/delete                                                                                       | Route handlers, Zod validation, Drizzle                               |
+| **Auth**                                          | Magic link + Google, sessions, rate limits, account deletion                                                                                                            | Better Auth (ADR-0005)                                                |
+| **Admin** (`app/admin/…`)                         | Import diff preview + publish, analytics, flags, entitlements                                                                                                           | Server components, role check                                         |
+| **Data access layer** (`src/server/db/`)          | The **only** place SQL runs. Every personal query takes `userId` from the session, never from input                                                                     | Drizzle (ADR-0004)                                                    |
+| **Search**                                        | Static, chunked index generated at build                                                                                                                                | Pagefind custom records (ADR-0008)                                    |
 
 ## 4. Content pipeline
 
@@ -68,16 +68,16 @@ flowchart TD
 - Parts 11–15 exist only in the Index; they are created from it.
 - **Section types are matched by heading prefix**, not exact text (the template has variants):
 
-  | Type key | Matches heading starting with | Interactive behaviour |
-  | --- | --- | --- |
-  | `jargon` | `Jargon decoder` | Glossary + hover terms |
-  | `interview` | `Interview questions` | Flashcards |
-  | `lab`, `lab-2`… | `Practice lab` | Checklist |
-  | `drill` | `Decision drill` | Answer-before-reveal |
-  | `stuck` | `Stuck? Ask Claude` | Copy prompts, highlight `[placeholders]` |
-  | `judgment` | `Where the judgment is` | — |
-  | `further-reading` | `Further reading` | — |
-  | anything else | — | Key = slug of heading text |
+  | Type key          | Matches heading starting with | Interactive behaviour                    |
+  | ----------------- | ----------------------------- | ---------------------------------------- |
+  | `jargon`          | `Jargon decoder`              | Glossary + hover terms                   |
+  | `interview`       | `Interview questions`         | Flashcards                               |
+  | `lab`, `lab-2`…   | `Practice lab`                | Checklist                                |
+  | `drill`           | `Decision drill`              | Answer-before-reveal                     |
+  | `stuck`           | `Stuck? Ask Claude`           | Copy prompts, highlight `[placeholders]` |
+  | `judgment`        | `Where the judgment is`       | —                                        |
+  | `further-reading` | `Further reading`             | —                                        |
+  | anything else     | —                             | Key = slug of heading text               |
 
 - `**Definition:**` is an inline paragraph (not a `###`); it becomes the chapter's summary/lede.
 - **Labs**: `#### Step N — Title` (N may be `7b`) → checklist steps; `#### When it breaks` → collapsible table; `#### Commit it` **or** a `**Commit it…:**` paragraph (Chapters 1–6) → commit block; other `####` (e.g. "You now have", "SQLite vs Postgres") render as plain lab content. A final "I committed it" confirmation is always rendered (Chapter 2 has no commit marker). `**Time:** …` feeds the lab duration estimate.
@@ -89,14 +89,14 @@ flowchart TD
 
 ### 4.2 Stable keys and idempotent re-import (ADR-0009)
 
-| Entity | Key | Example |
-| --- | --- | --- |
-| Course | slug from `courses.json` | `ai-engineering-handbook` |
-| Chapter | `ch-<number>` (front matter: `start-<slug>`) | `ch-21` |
-| Section | type key or heading slug | `drill`, `lab-2`, `choosing-a-vector-database` |
-| Lab step | `step-<label>` | `step-7b` |
-| Flashcard | `<chapter>:q-<hash8 of normalised question>` | `ch-1:q-3fa9c2d1` |
-| Glossary term | slug of term | `rate-limit` |
+| Entity        | Key                                          | Example                                        |
+| ------------- | -------------------------------------------- | ---------------------------------------------- |
+| Course        | slug from `courses.json`                     | `ai-engineering-handbook`                      |
+| Chapter       | `ch-<number>` (front matter: `start-<slug>`) | `ch-21`                                        |
+| Section       | type key or heading slug                     | `drill`, `lab-2`, `choosing-a-vector-database` |
+| Lab step      | `step-<label>`                               | `step-7b`                                      |
+| Flashcard     | `<chapter>:q-<hash8 of normalised question>` | `ch-1:q-3fa9c2d1`                              |
+| Glossary term | slug of term                                 | `rate-limit`                                   |
 
 URL slugs (`/learn/ai-engineering-handbook/21-tool-calling-function-calling`) are derived from titles for readability; the **key** is the number, so a title change only adds a redirect. Learner data references keys as strings — there are no foreign keys from personal tables into content, so a re-import can never cascade-delete progress. Removed keys are reported in the diff with the number of learners holding data on them; the data is kept (orphaned rows are harmless and reappear if the key returns).
 
@@ -261,18 +261,18 @@ When a part's last required item completes, the server re-checks completion **fr
 
 ## 8. Security model
 
-| Concern (OWASP 2021) | Control |
-| --- | --- |
+| Concern (OWASP 2021)      | Control                                                                                                                                                                                                                                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A01 Broken access control | Personal data reachable **only** through `src/server/db/repo.ts`, whose functions take a `userId` from `requireSession()`. No route accepts a user id from input. Admin routes call `requireAdmin()`. Isolation tests: user B attempts every read/write against user A's keys and ids → 404/empty |
-| A02 Crypto failures | TLS everywhere; tokens hashed at rest by Better Auth; certificate ids from CSPRNG |
-| A03 Injection | Drizzle parameterised queries only; Zod validation on every input; Markdown rendered with raw HTML disabled; notes rendered as text, never HTML |
-| A04 Insecure design | Threat model in this doc; rate limits; entitlement checks server-side |
-| A05 Misconfiguration | Security headers (CSP with nonces, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors 'none'`), env validated at boot with Zod |
-| A06 Vulnerable components | Renovate/Dependabot + `pnpm audit` in CI |
-| A07 Auth failures | Magic link single-use + expiry; rate limits on auth (ADR-0012); session rotation |
-| A08 Integrity | Stripe webhook signature verification (when enabled); lockfile, pinned CI actions |
-| A09 Logging | Structured logs with request id; no PII in logs (emails hashed); admin audit log |
-| A10 SSRF | Server makes no user-controlled outbound requests |
+| A02 Crypto failures       | TLS everywhere; tokens hashed at rest by Better Auth; certificate ids from CSPRNG                                                                                                                                                                                                                 |
+| A03 Injection             | Drizzle parameterised queries only; Zod validation on every input; Markdown rendered with raw HTML disabled; notes rendered as text, never HTML                                                                                                                                                   |
+| A04 Insecure design       | Threat model in this doc; rate limits; entitlement checks server-side                                                                                                                                                                                                                             |
+| A05 Misconfiguration      | Security headers (CSP with nonces, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors 'none'`), env validated at boot with Zod                                                                                                                             |
+| A06 Vulnerable components | Renovate/Dependabot + `pnpm audit` in CI                                                                                                                                                                                                                                                          |
+| A07 Auth failures         | Magic link single-use + expiry; rate limits on auth (ADR-0012); session rotation                                                                                                                                                                                                                  |
+| A08 Integrity             | Stripe webhook signature verification (when enabled); lockfile, pinned CI actions                                                                                                                                                                                                                 |
+| A09 Logging               | Structured logs with request id; no PII in logs (emails hashed); admin audit log                                                                                                                                                                                                                  |
+| A10 SSRF                  | Server makes no user-controlled outbound requests                                                                                                                                                                                                                                                 |
 
 CSRF: Better Auth origin checks; state-changing API routes require JSON `Content-Type` and same-origin `Origin`.
 
@@ -286,26 +286,26 @@ CSRF: Better Auth origin checks; state-changing API routes require JSON `Content
 
 ## 10. Cost model (launch scale)
 
-| Item | Plan | $/month |
-| --- | --- | --- |
-| Cloudflare Workers (+ Hyperdrive, edge cache) | Workers Paid | 5 |
-| Postgres | Neon Launch (or Supabase Pro) | 0–19 |
-| Email (magic links) | Resend free (3k/month) → Pro | 0–20 |
-| Sentry | Developer (free) | 0 |
-| Uptime checks | UptimeRobot free / Cloudflare health checks | 0 |
-| Analytics | Cloudflare Web Analytics (free, cookieless) | 0 |
-| Domain | ~£10/year | ~1 |
-| **Total** | | **≈ $6–45** |
+| Item                                          | Plan                                        | $/month     |
+| --------------------------------------------- | ------------------------------------------- | ----------- |
+| Cloudflare Workers (+ Hyperdrive, edge cache) | Workers Paid                                | 5           |
+| Postgres                                      | Neon Launch (or Supabase Pro)               | 0–19        |
+| Email (magic links)                           | Resend free (3k/month) → Pro                | 0–20        |
+| Sentry                                        | Developer (free)                            | 0           |
+| Uptime checks                                 | UptimeRobot free / Cloudflare health checks | 0           |
+| Analytics                                     | Cloudflare Web Analytics (free, cookieless) | 0           |
+| Domain                                        | ~£10/year                                   | ~1          |
+| **Total**                                     |                                             | **≈ $6–45** |
 
 Main cost driver at scale is email volume (sign-ins) and database compute; both are monitored.
 
 ## 11. Environments
 
-| Env | Where | Database | Email |
-| --- | --- | --- | --- |
-| local | `pnpm dev` + Docker Compose | Postgres container | Mailpit (web UI on :8025) |
-| CI | GitHub Actions | Postgres service container | logged only |
-| preview | Cloudflare Workers preview per PR (when connected) | Neon branch | Resend test mode |
-| production | Cloudflare Workers | Neon main (London) | Resend |
+| Env        | Where                                              | Database                   | Email                     |
+| ---------- | -------------------------------------------------- | -------------------------- | ------------------------- |
+| local      | `pnpm dev` + Docker Compose                        | Postgres container         | Mailpit (web UI on :8025) |
+| CI         | GitHub Actions                                     | Postgres service container | logged only               |
+| preview    | Cloudflare Workers preview per PR (when connected) | Neon branch                | Resend test mode          |
+| production | Cloudflare Workers                                 | Neon main (London)         | Resend                    |
 
 Placeholders for Cloudflare, Resend, Google OAuth, Sentry and the domain are in `.env.example`; the app runs fully without them.

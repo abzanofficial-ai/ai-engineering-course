@@ -1,0 +1,78 @@
+{
+  "name": "handbook-lms",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "pnpm content:build && next build",
+    "start": "next start",
+    "content:build": "tsx scripts/content-build.ts",
+    "content:diff": "tsx scripts/content-diff.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "github-slugger": "2.0.0",
+    "hast-util-to-html": "9.0.5",
+    "hastscript": "^9.0.1",
+    "mdast-util-from-markdown": "2.1.0",
+    "mdast-util-gfm": "^3.1.0",
+    "mdast-util-to-hast": "^13.2.1",
+    "mdast-util-to-string": "^4.0.0",
+    "micromark-extension-gfm": "^3.0.0",
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "rehype-stringify": "10.0.1",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "remark-rehype": "11.1.2",
+    "shiki": "4.5.0",
+    "unified": "11.0.5",
+    "unist-util-visit": "5.2.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/hast": "^3.0.5",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/unist": "^3.0.3",
+    "@vitest/coverage-v8": "^5.0.5",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.4.3",
+    "mermaid": "12.2.0",
+    "pagefind": "1.5.2",
+    "playwright": "1.63.0",
+    "playwright-core": "1.63.0",
+    "postcss": "^8.5.32",
+    "prettier": "^3.9.10",
+    "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "5.0.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "unrs-resolver"
+    ],
+    "overrides": {
+      "playwright-core": "1.63.0"
+    }
+  }
+}
