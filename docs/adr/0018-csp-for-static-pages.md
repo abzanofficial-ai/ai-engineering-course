@@ -19,3 +19,7 @@ XSS is prevented at the source rather than relying on CSP:
 ## Consequences
 
 CSP is defence in depth, not the primary XSS control. Revisit if Next.js ships hash-based inline script support for static pages.
+
+## Update (M4)
+
+`script-src` adds `'wasm-unsafe-eval'` so the static search index (Pagefind, ADR-0008) can compile its WebAssembly module. It permits WebAssembly compilation only; JavaScript `eval` stays blocked in production.

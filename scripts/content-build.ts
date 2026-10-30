@@ -5,6 +5,7 @@ import path from "node:path";
 import { buildCourse, mermaidSources } from "../src/content/build-course";
 import { coursesFileSchema } from "../src/content/config";
 import { renderDiagrams } from "../src/content/diagrams";
+import type { SearchRecord } from "../src/content/types";
 import type { DiagramRenders } from "../src/content/types";
 
 const root = process.cwd();
@@ -20,6 +21,7 @@ const { courses } = coursesFileSchema.parse(
   JSON.parse(readFileSync(path.join(root, "content/courses.json"), "utf8")),
 );
 rmSync(outRoot, { recursive: true, force: true });
+const searchRecords: (SearchRecord & { pageLabel: string })[] = [];
 
 for (const course of courses) {
   const started = Date.now();
@@ -40,6 +42,9 @@ for (const course of courses) {
   writeJson(path.join(dir, "cards.json"), build.cards);
   writeJson(path.join(dir, "diagrams.json"), build.diagrams);
   writeJson(path.join(dir, "search.json"), build.search);
+  const labels = new Map(build.manifest.pages.map((p) => [p.key, p.label]));
+  for (const r of build.search)
+    searchRecords.push({ ...r, pageLabel: labels.get(r.pageKey) ?? "" });
 
   const m = build.manifest;
   const published = m.pages.filter((p) => p.status === "published").length;
@@ -70,3 +75,21 @@ const registry =
     .join("\n") +
   `\n};\n`;
 writeFileSync(path.join(outRoot, "index.ts"), registry);
+
+// Full-text search (ADR-0008): a static, chunked Pagefind index, one record per section.
+const pagefind = await import("pagefind");
+const { index } = await pagefind.createIndex({});
+if (!index) throw new Error("Pagefind could not create an index");
+for (const r of searchRecords) {
+  await index.addCustomRecord({
+    url: r.url,
+    content: r.text,
+    language: "en",
+    meta: { title: r.title, page: r.pageLabel ? `${r.pageLabel}: ${r.pageTitle}` : r.pageTitle },
+  });
+}
+const outputPath = path.join(root, "public/pagefind");
+rmSync(outputPath, { recursive: true, force: true });
+await index.writeFiles({ outputPath });
+await pagefind.close();
+console.log(`✓ search index: ${searchRecords.length} sections`);

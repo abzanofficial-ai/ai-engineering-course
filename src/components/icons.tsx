@@ -18,6 +18,9 @@ const PATHS = {
   medal: "M12 9a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM8 3l4 6 4-6",
   user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0",
   contrast: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 3v18",
+  search: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4",
+  bookmark: "M6 3h12v18l-6-4-6 4z",
+  note: "M5 4h14v12l-4 4H5zM15 20v-4h4M8 9h8M8 13h5",
 } as const;
 
 export type IconName = keyof typeof PATHS;

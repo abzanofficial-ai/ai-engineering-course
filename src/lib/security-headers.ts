@@ -4,7 +4,8 @@
 export function contentSecurityPolicy(dev = process.env.NODE_ENV !== "production"): string {
   return [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""}`,
+    // 'wasm-unsafe-eval' lets the search index (Pagefind) compile WebAssembly; it does not allow JS eval.
+    `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${dev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https://lh3.googleusercontent.com",
     "font-src 'self'",

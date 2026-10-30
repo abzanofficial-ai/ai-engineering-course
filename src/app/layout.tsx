@@ -3,6 +3,7 @@ import { Bricolage_Grotesque } from "next/font/google";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { AccountPrompt, HeaderStatus } from "@/components/header-status";
+import { Icon } from "@/components/icons";
 import { LearnerProvider } from "@/components/learner/provider";
 import { Pwa } from "@/components/pwa";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -60,6 +61,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <span>{brand.headerName}</span>
               </Link>
               <HeaderStatus />
+              <Link
+                className="icon-btn"
+                href="/search"
+                aria-label="Search the course"
+                title="Search"
+              >
+                <Icon name="search" />
+              </Link>
               <ThemeToggle />
             </div>
           </header>
