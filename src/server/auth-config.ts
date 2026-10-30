@@ -1,6 +1,7 @@
 // Authentication (ADR-0005): email magic link + optional Google, sessions in Postgres.
 import { createHash } from "node:crypto";
 import { betterAuth } from "better-auth";
+import { defaultBranding } from "@/lib/branding";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { magicLink } from "better-auth/plugins";
@@ -10,6 +11,7 @@ import { magicLinkEmail, sendEmail } from "./email";
 import { authSecret, env, googleEnabled } from "./env";
 import { log } from "./log";
 import { allow } from "./rate-limit";
+import { tenantBranding } from "./tenant";
 
 const hashEmail = (email: string) =>
   createHash("sha256").update(email.toLowerCase()).digest("hex").slice(0, 16);
@@ -23,7 +25,7 @@ const adminEmails = () =>
 
 function createAuth() {
   return betterAuth({
-    appName: "AI Engineering Handbook",
+    appName: defaultBranding.name,
     baseURL: env().APP_URL,
     secret: authSecret(),
     trustedOrigins: [env().APP_URL],
@@ -66,7 +68,7 @@ function createAuth() {
             log.warn("auth.magic_link_rate_limited", { email: hashEmail(email) });
             throw new Error("Too many sign-in links requested. Try again in an hour.");
           }
-          await sendEmail(magicLinkEmail(email, url));
+          await sendEmail(magicLinkEmail(email, url, await tenantBranding()));
           log.info("auth.magic_link_sent", { email: hashEmail(email) });
         },
       }),

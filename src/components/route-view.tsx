@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import { defaultBranding as brand } from "@/lib/branding";
 import { partHue } from "@/lib/hues";
 import { averageProgress, pageProgress } from "@/lib/learner-state";
 import { formatLab, type RouteData, type RoutePage } from "@/lib/route-data";
@@ -34,10 +35,7 @@ export function RouteView({ data }: { data: RouteData }) {
     <div className="wrap">
       <section className="hero" aria-labelledby="title">
         <h1 id="title">{data.title}</h1>
-        <p>
-          A practical route from beginner to job-ready AI engineer. Read, build, decide and explain,
-          one chapter at a time.
-        </p>
+        <p>{brand.homeIntro}</p>
         <div className="stats">
           <div className="stat">
             <b>{data.counts.chapters}</b>

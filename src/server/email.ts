@@ -1,9 +1,12 @@
 // Email delivery (ADR-0014): Resend in production, Mailpit locally, in-memory in tests.
 // All transports use fetch, so this runs unchanged on Cloudflare Workers.
+import { emailFrom, type TenantConfig } from "@/lib/branding";
 import { env } from "./env";
 import { log } from "./log";
 
 export interface Email {
+  /** "Name <address>" from the tenant's branding (ADR-0024). */
+  from: string;
   to: string;
   subject: string;
   text: string;
@@ -37,7 +40,7 @@ export async function sendEmail(email: Email): Promise<void> {
       method: "POST",
       headers: { Authorization: `Bearer ${e.RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: e.EMAIL_FROM,
+        from: e.EMAIL_FROM ?? email.from,
         to: email.to,
         subject: email.subject,
         text: email.text,
@@ -54,7 +57,7 @@ export async function sendEmail(email: Email): Promise<void> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        From: { Email: "no-reply@example.com", Name: "AI Engineering Handbook" },
+        From: parseFrom(email.from),
         To: [{ Email: email.to }],
         Subject: email.subject,
         Text: email.text,
@@ -68,13 +71,20 @@ export async function sendEmail(email: Email): Promise<void> {
   }
 }
 
+function parseFrom(from: string): { Email: string; Name: string } {
+  const m = from.match(/^(.*)<([^>]+)>$/);
+  return m ? { Name: m[1]!.trim(), Email: m[2]!.trim() } : { Name: "", Email: from };
+}
+
 const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-export function magicLinkEmail(to: string, url: string): Email {
+export function magicLinkEmail(to: string, url: string, brand: TenantConfig): Email {
+  const name = brand.name;
   return {
+    from: emailFrom(brand),
     to,
-    subject: "Your sign-in link for The AI Engineering Handbook",
-    text: `Sign in to The AI Engineering Handbook:\n\n${url}\n\nThis link works once and expires in 10 minutes. If you didn't ask for it, ignore this email.`,
-    html: `<p>Sign in to <strong>The AI Engineering Handbook</strong>:</p><p><a href="${escapeHtml(url)}">Sign in</a></p><p>This link works once and expires in 10 minutes. If you didn't ask for it, ignore this email.</p>`,
+    subject: `Your sign-in link for ${name}`,
+    text: `Sign in to ${name}:\n\n${url}\n\nThis link works once and expires in 10 minutes. If you didn't ask for it, ignore this email.\n\nNeed help? ${brand.supportEmail}`,
+    html: `<p>Sign in to <strong>${escapeHtml(name)}</strong>:</p><p><a href="${escapeHtml(url)}">Sign in</a></p><p>This link works once and expires in 10 minutes. If you didn't ask for it, ignore this email.</p><p>Need help? ${escapeHtml(brand.supportEmail)}</p>`,
   };
 }

@@ -6,6 +6,7 @@ import path from "node:path";
 import { generated } from "@generated/index";
 import coursesFile from "../../content/courses.json";
 import { coursesFileSchema, isPublicPage, type CourseEntry } from "@/content/config";
+import { defaultBranding } from "@/lib/branding";
 import type { CourseManifest, Page, PageMeta } from "@/content/types";
 
 const { courses } = coursesFileSchema.parse(coursesFile);
@@ -43,9 +44,8 @@ export function loadPage(courseSlug: string, pageKey: string): Page {
   return JSON.parse(readFileSync(file, "utf8")) as Page;
 }
 
-export function isPagePublic(courseSlug: string, pageKey: string): boolean {
-  const entry = getCourseEntry(courseSlug);
-  return entry ? isPublicPage(entry.publicPages, pageKey) : false;
+export function isPagePublic(pageKey: string): boolean {
+  return isPublicPage(defaultBranding.access.publicPages, pageKey);
 }
 
 /** Previous/next published pages in reading order. */

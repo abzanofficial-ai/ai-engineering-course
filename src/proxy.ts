@@ -5,11 +5,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { generated } from "@generated/index";
 import coursesFile from "../content/courses.json";
 import { needsSession, type CourseAccess } from "@/lib/access";
+import { defaultBranding } from "@/lib/branding";
 
 const courses: CourseAccess[] = coursesFile.courses.map((c) => ({
   slug: c.slug,
   manifest: generated[c.slug]!.manifest,
-  publicPages: c.publicPages,
+  // Which pages are public is a tenant decision (ADR-0024); per-host tenants arrive in Phase 2.
+  publicPages: defaultBranding.access.publicPages,
 }));
 
 export function proxy(request: NextRequest) {

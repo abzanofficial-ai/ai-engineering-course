@@ -8,7 +8,8 @@ const schema = z.object({
   DATABASE_URL: z.string().default("postgres://lms:lms_local_only@localhost:5432/lms"),
   AUTH_SECRET: z.string().min(32).optional(),
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().default("AI Engineering Handbook <no-reply@example.com>"),
+  /** Optional override of the tenant's email sender (ADR-0024), e.g. for a verified domain. */
+  EMAIL_FROM: z.string().optional(),
   /** "memory" captures emails in-process (tests); "mailpit" posts to the local Mailpit API. */
   EMAIL_TRANSPORT: z.enum(["auto", "memory", "mailpit", "console", "file"]).default("auto"),
   /** "file" transport (end-to-end tests only): append emails as JSON lines to this path. */

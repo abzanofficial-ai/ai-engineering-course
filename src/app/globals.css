@@ -227,15 +227,7 @@ li a:not(.ch):not(.check-card) {
   height: 26px;
   border-radius: 7px;
   flex: none;
-  background: conic-gradient(
-    from 200deg,
-    hsl(175 70% 40%),
-    hsl(220 70% 50%),
-    hsl(280 60% 55%),
-    hsl(330 65% 52%),
-    hsl(25 85% 50%),
-    hsl(175 70% 40%)
-  );
+  background: var(--brand-mark, var(--accent));
 }
 .me {
   margin-left: auto;

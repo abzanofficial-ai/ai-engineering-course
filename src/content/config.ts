@@ -6,8 +6,6 @@ export const courseConfigSchema = z.object({
   source: z.string(),
   /** Entitlement product that grants access (ADR-0010). */
   product: z.string(),
-  /** Page keys readable without an account; `*` wildcard suffix allowed (ADR-0015). */
-  publicPages: z.array(z.string()).default([]),
 });
 
 export const coursesFileSchema = z.object({ courses: z.array(courseConfigSchema).min(1) });
