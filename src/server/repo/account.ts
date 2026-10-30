@@ -17,6 +17,7 @@ const PERSONAL_TABLES = {
   checkpointAttempts: t.checkpointAttempt,
   bookmarks: t.bookmark,
   notes: t.note,
+  certificates: t.certificate,
   activityDays: t.activityDay,
   settings: t.userSettings,
 } as const;

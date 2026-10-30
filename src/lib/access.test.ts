@@ -24,6 +24,8 @@ describe("needsSession", () => {
     ["/sign-in", false],
     ["/review", true],
     ["/notes", true],
+    ["/certificates", true],
+    ["/certificates/AbCdEfGhIjKlMnOpQrStUv", false],
     ["/search", false],
     [`${L}/glossary`, false],
     [`${L}/checkpoint/1`, true],

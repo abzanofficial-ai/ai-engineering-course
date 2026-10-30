@@ -15,6 +15,7 @@ import {
   boolean,
   integer,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -316,6 +317,24 @@ export const note = pgTable(
     primaryKey({ columns: [t.tenantId, t.userId, t.id] }),
     index("note_page_idx").on(t.tenantId, t.userId, t.course, t.pageKey),
   ],
+);
+
+// ---------------------------------------------------------------------------
+// Certificates (ADR-0029). The id is public and unguessable; everything else is private.
+
+export const certificate = pgTable(
+  "certificate",
+  {
+    id: text("id").primaryKey(),
+    tenantId: tenantRef(),
+    userId: userRef(),
+    course: text("course").notNull(),
+    /** "part:N" or "course". */
+    scope: text("scope").notNull(),
+    nameSnapshot: text("name_snapshot").notNull(),
+    issuedAt: timestamp("issued_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("certificate_once").on(t.tenantId, t.userId, t.course, t.scope)],
 );
 
 // ---------------------------------------------------------------------------

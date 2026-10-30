@@ -4,6 +4,38 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### M5a — Verifiable certificates
+
+#### Added
+
+- Part certificates (ADR-0029). To earn one, finish every published chapter in the part (every
+  section read, every lab step done and committed, the drill answered, every question rated)
+  and pass the part checkpoint. The server re-checks all of this from the database before
+  issuing. Claiming is idempotent and needs a name on the account.
+- The course certificate becomes available once every chapter is published and every part
+  certificate is earned. The page says so until then.
+- `/certificates`: each part's progress towards its certificate, "Claim certificate", view,
+  copy link and delete.
+- `/certificates/<id>`: a public verification page with a 128-bit random id. It shows only the
+  name, scope, course, date and issuer, is `noindex` and prints cleanly to PDF. Deleted or
+  unknown ids are 404.
+- Certificates are included in the data export and deleted with the account. The dashboard
+  links to them.
+- Migration 0005 adds the `certificate` table. It is additive only.
+
+#### Tests
+
+- Unit: eligibility rules and strict scope parsing.
+- Integration:
+  - not eligible until complete, idempotent claims, a name is required, and the name is
+    snapshotted at issue;
+  - the public lookup reveals nothing else;
+  - another learner can't list or delete a certificate, and isn't eligible;
+  - it is tenant-scoped and removed with the account;
+  - the isolation route list and the repository classification are updated.
+- E2E: earn Part 1 through the real API, claim, view, verify signed out (`noindex`, no email
+  shown), delete and get a 404, with axe.
+
 ### Fixed
 
 - "Mark as read" on the last section of a chapter without a lab saved the section but showed

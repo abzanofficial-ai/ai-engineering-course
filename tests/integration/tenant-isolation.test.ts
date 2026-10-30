@@ -8,6 +8,7 @@ import * as ops from "@/app/api/me/ops/route";
 import { generated } from "@generated/index";
 import { db } from "@/server/db/client";
 import * as accountRepo from "@/server/repo/account";
+import * as certificateRepo from "@/server/repo/certificate";
 import * as checkpointRepo from "@/server/repo/checkpoint";
 import * as progressRepo from "@/server/repo/progress";
 import * as stateRepo from "@/server/repo/state";
@@ -45,7 +46,17 @@ const write = (tenantId: string, userId: string, answer: string) =>
 
 describe("tenant isolation", () => {
   it("classifies every repository export as tenant-scoped, identity-level or infrastructure", () => {
-    const TENANT_SCOPED = ["applyOps", "loadState", "exportUserData", "submitCheckpoint"];
+    const TENANT_SCOPED = [
+      "applyOps",
+      "loadState",
+      "exportUserData",
+      "submitCheckpoint",
+      "claimCertificate",
+      "listCertificates",
+      "deleteCertificate",
+    ];
+    // Public by design: looks up one certificate by its unguessable id (ADR-0029).
+    const PUBLIC = ["verifyCertificate"];
     const IDENTITY = ["deleteUser", "updateName"]; // the global sign-in identity (ADR-0023)
     const INFRA = [
       "clampDay",
@@ -58,12 +69,18 @@ describe("tenant isolation", () => {
       "checkpointSchema",
       "clearTenantCaches",
       "DEFAULT_TENANT_ID",
+      "newCertificateId",
     ];
-    const exported = [accountRepo, checkpointRepo, progressRepo, stateRepo, tenantRepo].flatMap(
-      (m) => Object.keys(m),
-    );
+    const exported = [
+      accountRepo,
+      certificateRepo,
+      checkpointRepo,
+      progressRepo,
+      stateRepo,
+      tenantRepo,
+    ].flatMap((m) => Object.keys(m));
     // A new repository function must be added to one of the lists (and, if tenant-scoped, tested below).
-    expect(exported.sort()).toEqual([...TENANT_SCOPED, ...IDENTITY, ...INFRA].sort());
+    expect(exported.sort()).toEqual([...TENANT_SCOPED, ...PUBLIC, ...IDENTITY, ...INFRA].sort());
   });
 
   it("the same learner in two tenants has fully separate progress", async () => {

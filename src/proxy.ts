@@ -32,6 +32,7 @@ export const config = {
     "/progress",
     "/review",
     "/notes",
+    "/certificates",
     "/admin/:path*",
   ],
 };

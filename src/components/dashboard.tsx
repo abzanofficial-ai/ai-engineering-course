@@ -232,9 +232,9 @@ export function Dashboard({
             </li>
           ))}
           <li>
-            <span className="dash-soon" aria-disabled="true">
-              <Icon name="medal" /> Certificates <small>soon</small>
-            </span>
+            <Link className="dash-link" href="/certificates">
+              <Icon name="medal" /> Certificates
+            </Link>
           </li>
         </ul>
       </nav>

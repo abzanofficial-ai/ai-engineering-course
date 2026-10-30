@@ -20,12 +20,15 @@ const SECRET_ANSWER = "Learner A's private drill answer, which nobody else may r
 
 /** Every personal route handled here. Adding a route under api/me without a case fails the suite. */
 // me/checkpoints/route.ts: isolation cases in checkpoints.test.ts.
+// me/certificates/route.ts and me/certificates/[id]/route.ts: cases in certificates.test.ts.
 const COVERED = [
   "me/route.ts",
   "me/export/route.ts",
   "me/ops/route.ts",
   "me/state/route.ts",
   "me/checkpoints/route.ts",
+  "me/certificates/route.ts",
+  "me/certificates/[id]/route.ts",
 ];
 
 async function seedA() {

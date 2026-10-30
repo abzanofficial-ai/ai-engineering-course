@@ -44,3 +44,15 @@ DROP TABLE "note"; DROP TABLE "bookmark";
 DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrations" ORDER BY created_at DESC LIMIT 1);
 COMMIT;
 ```
+
+## Rolling back migration 0005 (certificates)
+
+Additive only. Deploy the previous application version first, then (after exporting the table
+if issued certificates must be kept):
+
+```sql
+BEGIN;
+DROP TABLE "certificate";
+DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrations" ORDER BY created_at DESC LIMIT 1);
+COMMIT;
+```
