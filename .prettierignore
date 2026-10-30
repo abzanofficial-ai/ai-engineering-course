@@ -4,3 +4,4 @@ pnpm-lock.yaml
 .cache
 public/pagefind
 public/diagrams
+drizzle/meta
