@@ -111,7 +111,21 @@ export function RouteView({ data }: { data: RouteData }) {
               </span>
             </Link>
           </div>
-        ) : status === "anon" ? (
+        ) : null}
+        {signedIn && state.due.length > 0 && (
+          <Link className="hp review-due" href="/review">
+            <span className="flame" style={{ color: "var(--review)" }}>
+              <Icon name="review" />
+            </span>
+            <span>
+              <b>
+                {state.due.length} question{state.due.length === 1 ? "" : "s"} to review
+              </b>
+              <span>Spaced repetition keeps them fresh</span>
+            </span>
+          </Link>
+        )}
+        {status === "anon" ? (
           <p className="small">
             <Link href="/sign-in">Create a free account</Link> to save your progress, earn XP and
             keep a streak.
@@ -204,6 +218,37 @@ export function RouteView({ data }: { data: RouteData }) {
                         </li>
                       );
                     })}
+                    {part.number > 0 && (
+                      <li>
+                        <Link
+                          className={`check-card${state.checkpoints[String(part.number)]?.passed ? " passed" : ""}`}
+                          href={`/learn/${data.course}/checkpoint/${part.number}`}
+                        >
+                          <span style={{ color: "var(--c)" }}>
+                            <Icon
+                              name={
+                                state.checkpoints[String(part.number)]?.passed ? "medal" : "flag"
+                              }
+                            />
+                          </span>
+                          <span>
+                            <span className="k">Part {part.number} checkpoint</span>
+                            <br />
+                            <span className="t">
+                              {(() => {
+                                const c = state.checkpoints[String(part.number)];
+                                if (c?.passed) return `Passed · best ${c.best}% confident`;
+                                if (c) return `Best ${c.best}% · try again`;
+                                return "10 questions + 1 drill · pass at 80% confident";
+                              })()}
+                            </span>
+                          </span>
+                          <span style={{ marginLeft: "auto" }}>
+                            <Icon name="arrow" />
+                          </span>
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 ) : (
                   <p className="soon-list">{part.pages.map((p) => p.title).join(" · ")}</p>

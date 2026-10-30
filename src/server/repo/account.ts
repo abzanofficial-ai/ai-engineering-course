@@ -14,6 +14,7 @@ const PERSONAL_TABLES = {
   cardReviews: t.cardReview,
   lastPositions: t.lastPosition,
   xpEvents: t.xpEvent,
+  checkpointAttempts: t.checkpointAttempt,
   activityDays: t.activityDay,
   settings: t.userSettings,
 } as const;

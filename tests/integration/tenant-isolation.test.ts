@@ -8,6 +8,7 @@ import * as ops from "@/app/api/me/ops/route";
 import { generated } from "@generated/index";
 import { db } from "@/server/db/client";
 import * as accountRepo from "@/server/repo/account";
+import * as checkpointRepo from "@/server/repo/checkpoint";
 import * as progressRepo from "@/server/repo/progress";
 import * as stateRepo from "@/server/repo/state";
 import * as tenantRepo from "@/server/repo/tenant";
@@ -44,7 +45,7 @@ const write = (tenantId: string, userId: string, answer: string) =>
 
 describe("tenant isolation", () => {
   it("classifies every repository export as tenant-scoped, identity-level or infrastructure", () => {
-    const TENANT_SCOPED = ["applyOps", "loadState", "exportUserData"];
+    const TENANT_SCOPED = ["applyOps", "loadState", "exportUserData", "submitCheckpoint"];
     const IDENTITY = ["deleteUser", "updateName"]; // the global sign-in identity (ADR-0023)
     const INFRA = [
       "clampDay",
@@ -54,11 +55,12 @@ describe("tenant isolation", () => {
       "getTenant",
       "ensureMembership",
       "courseAccess",
+      "checkpointSchema",
       "clearTenantCaches",
       "DEFAULT_TENANT_ID",
     ];
-    const exported = [accountRepo, progressRepo, stateRepo, tenantRepo].flatMap((m) =>
-      Object.keys(m),
+    const exported = [accountRepo, checkpointRepo, progressRepo, stateRepo, tenantRepo].flatMap(
+      (m) => Object.keys(m),
     );
     // A new repository function must be added to one of the lists (and, if tenant-scoped, tested below).
     expect(exported.sort()).toEqual([...TENANT_SCOPED, ...IDENTITY, ...INFRA].sort());
@@ -91,6 +93,27 @@ describe("tenant isolation", () => {
     await write("tnt_default", a, SECRET);
     const s = await stateRepo.loadState({ tenantId: OTHER, userId: b }, COURSE, TODAY);
     expect(JSON.stringify(s)).not.toContain(SECRET);
+  });
+
+  it("checkpoint attempts are tenant-scoped", async () => {
+    await makeOtherTenant();
+    const u = await makeUser("cp-tenant");
+    const { partContent, seedFor, selectQuestions } = await import("@/lib/checkpoint");
+    const keys = selectQuestions(partContent(generated[COURSE]!.manifest, 1).cards, seedFor(1, 1));
+    const r = await checkpointRepo.submitCheckpoint(
+      { tenantId: "tnt_default", userId: u },
+      {
+        course: COURSE,
+        part: 1,
+        day: TODAY,
+        ratings: Object.fromEntries(keys.map((k) => [k, "confident" as const])),
+        answer: SECRET,
+      },
+    );
+    expect(r).toMatchObject({ ok: true, passed: true });
+    expect(
+      (await stateRepo.loadState({ tenantId: OTHER, userId: u }, COURSE, TODAY)).checkpoints,
+    ).toEqual({});
   });
 
   it("export covers only the current tenant", async () => {

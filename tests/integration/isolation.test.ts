@@ -19,7 +19,14 @@ const lab = generated[COURSE]!.manifest.pages.find((p) => p.key === "ch-1")!.sec
 const SECRET_ANSWER = "Learner A's private drill answer, which nobody else may read.";
 
 /** Every personal route handled here. Adding a route under api/me without a case fails the suite. */
-const COVERED = ["me/route.ts", "me/export/route.ts", "me/ops/route.ts", "me/state/route.ts"];
+// me/checkpoints/route.ts: isolation cases in checkpoints.test.ts.
+const COVERED = [
+  "me/route.ts",
+  "me/export/route.ts",
+  "me/ops/route.ts",
+  "me/state/route.ts",
+  "me/checkpoints/route.ts",
+];
 
 async function seedA() {
   const a = await signIn("learner-a@example.test");

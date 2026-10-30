@@ -25,6 +25,9 @@ interface LearnerContext {
   state: LearnerState;
   save: SaveStatus;
   dispatch: (op: OpInput) => void;
+  /** Replace state with a fresh server response (e.g. after a checkpoint submission). */
+  acceptServerState: (s: LearnerState) => void;
+  notify: (text: string) => void;
   /** Shown when a signed-out reader tries to save something. */
   promptAccount: boolean;
   dismissPrompt: () => void;
@@ -240,6 +243,11 @@ export function LearnerProvider({ course, children }: { course: string; children
     [status, setPendingBoth],
   );
 
+  const acceptServerState = useCallback((s: LearnerState) => {
+    setServer(s);
+    if (snapshotKey.current) storage.write(snapshotKey.current, s);
+  }, []);
+
   const value = useMemo<LearnerContext>(
     () => ({
       status,
@@ -247,10 +255,12 @@ export function LearnerProvider({ course, children }: { course: string; children
       state,
       save,
       dispatch,
+      acceptServerState,
+      notify: toast,
       promptAccount,
       dismissPrompt: () => setPrompt(false),
     }),
-    [status, user, state, save, dispatch, promptAccount],
+    [status, user, state, save, dispatch, acceptServerState, toast, promptAccount],
   );
 
   return (

@@ -257,6 +257,24 @@ export const lastPosition = pgTable(
   (t) => [primaryKey({ columns: [t.tenantId, t.userId, t.course] })],
 );
 
+export const checkpointAttempt = pgTable(
+  "checkpoint_attempt",
+  {
+    tenantId: tenantRef(),
+    userId: userRef(),
+    course: text("course").notNull(),
+    part: integer("part").notNull(),
+    attempt: integer("attempt").notNull(),
+    /** % of questions rated confident (ADR-0021). */
+    score: integer("score").notNull(),
+    passed: boolean("passed").notNull(),
+    /** Card keys asked and how the learner rated each; the drill page and their answer. */
+    detail: jsonb("detail").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.tenantId, t.userId, t.course, t.part, t.attempt] })],
+);
+
 // ---------------------------------------------------------------------------
 // Engagement (ADR-0019). Totals and streaks are computed, never stored.
 

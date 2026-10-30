@@ -56,6 +56,7 @@ export function ChapterShell({
   modes,
   learnKeys,
   anchors,
+  sections,
   children,
 }: {
   pageKey: string;
@@ -64,6 +65,8 @@ export function ChapterShell({
   learnKeys: string[];
   /** Section or element id → mode, for deep links. */
   anchors: Record<string, Mode>;
+  /** Every section in reading order, for the Sections menu. */
+  sections: SectionLink[];
   children: ReactNode;
 }) {
   const { state, status, dispatch } = useLearner();
@@ -135,7 +138,10 @@ export function ChapterShell({
     <Ctx.Provider
       value={{ pageKey, spec, modes, mode, setMode, learnIndex, setLearnIndex, learnKeys }}
     >
-      {modes.length > 1 && <ModeTabs />}
+      <nav className="tabs" aria-label="Chapter">
+        {modes.length > 1 && <ModeTabs />}
+        <SectionsMenu sections={sections} />
+      </nav>
       {children}
     </Ctx.Provider>
   );
@@ -158,27 +164,113 @@ function ModeTabs() {
     setMode(modes[(i + d + modes.length) % modes.length]!, true);
   };
   return (
-    <nav className="tabs" aria-label="Chapter modes">
-      <div className="wrap" role="tablist" style={{ "--n": modes.length } as CSSProperties}>
-        {modes.map((m, i) => (
-          <button
-            key={m}
-            id={`tab-${m}`}
-            className={`tab m-${m}`}
-            role="tab"
-            aria-selected={mode === m}
-            aria-controls={`panel-${m}`}
-            tabIndex={mode === m ? 0 : -1}
-            onClick={() => setMode(m)}
-            onKeyDown={(e) => onKey(e, i)}
-          >
-            <Icon name={m} />
-            <span>{LABEL[m]}</span>
-            <small>{status === "ready" ? label[m] : " "}</small>
-          </button>
-        ))}
+    <div
+      className="wrap tablist"
+      role="tablist"
+      aria-label="Chapter modes"
+      style={{ "--n": modes.length } as CSSProperties}
+    >
+      {modes.map((m, i) => (
+        <button
+          key={m}
+          id={`tab-${m}`}
+          className={`tab m-${m}`}
+          role="tab"
+          aria-selected={mode === m}
+          aria-controls={`panel-${m}`}
+          tabIndex={mode === m ? 0 : -1}
+          onClick={() => setMode(m)}
+          onKeyDown={(e) => onKey(e, i)}
+        >
+          <Icon name={m} />
+          <span>{LABEL[m]}</span>
+          <small>{status === "ready" ? label[m] : " "}</small>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export interface SectionLink {
+  key: string;
+  title: string;
+  mode: Mode;
+}
+
+/** Sticky list of every section (Phase 1 "sticky section TOC"), grouped by mode. */
+function SectionsMenu({ sections }: { sections: SectionLink[] }) {
+  const { mode, learnIndex, learnKeys, setMode, setLearnIndex, modes, pageKey } = useChapter();
+  const { state } = useLearner();
+  const [open, setOpen] = useState(false);
+  const button = useRef<HTMLButtonElement>(null);
+  const read = new Set(state.read[pageKey] ?? []);
+  const current =
+    mode === "learn"
+      ? sections.find((s) => s.key === learnKeys[learnIndex])
+      : sections.find((s) => s.mode === mode);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        button.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const go = (s: SectionLink) => {
+    setOpen(false);
+    if (s.mode === "learn") setLearnIndex(learnKeys.indexOf(s.key));
+    else {
+      setMode(s.mode);
+      requestAnimationFrame(() => document.getElementById(s.key)?.scrollIntoView());
+    }
+  };
+  return (
+    <div className="wrap sections-bar">
+      <button
+        ref={button}
+        type="button"
+        className="sections-toggle"
+        aria-expanded={open}
+        aria-controls="sections-panel"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="muted">Sections</span>
+        <span className="sections-current">{current?.title ?? ""}</span>
+        <span className="chev" aria-hidden="true">
+          <Icon name="chev" />
+        </span>
+      </button>
+      <div id="sections-panel" className="sections-panel" hidden={!open}>
+        {modes.map((m) => {
+          const list = sections.filter((s) => s.mode === m);
+          if (!list.length) return null;
+          return (
+            <div key={m} className={`m-${m}`}>
+              <p className="sections-mode">{LABEL[m]}</p>
+              <ol>
+                {list.map((s) => (
+                  <li key={s.key}>
+                    <button
+                      type="button"
+                      aria-current={current?.key === s.key ? "location" : undefined}
+                      onClick={() => go(s)}
+                    >
+                      {read.has(s.key) && <Icon name="check" label="read" />}
+                      {s.title}
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          );
+        })}
       </div>
-    </nav>
+    </div>
   );
 }
 

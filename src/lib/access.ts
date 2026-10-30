@@ -9,10 +9,11 @@ export interface CourseAccess {
 }
 
 /** Paths that always require a session. */
-const PRIVATE_PREFIXES = ["/account", "/progress", "/admin"];
+const PRIVATE_PREFIXES = ["/account", "/progress", "/review", "/admin"];
 
 export function needsSession(pathname: string, courses: CourseAccess[]): boolean {
   if (PRIVATE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return true;
+  if (/^\/learn\/[^/]+\/checkpoint\//.test(pathname)) return true; // checkpoints are personal
   const m = pathname.match(/^\/learn\/([^/]+)\/([^/]+)\/?$/);
   if (!m) return false; // course home and everything else is public
   const course = courses.find((c) => c.slug === m[1]);

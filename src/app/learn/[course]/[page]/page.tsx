@@ -145,7 +145,7 @@ export default async function ChapterPage({ params }: { params: Promise<Params> 
   if (!manifest || !meta) notFound();
   const page = loadPage(course, meta.key);
   const part = manifest.parts.find((p) => p.number === page.partNumber);
-  const { next } = neighbours(manifest, page.key);
+  const { prev, next } = neighbours(manifest, page.key);
   const spec = specOf(meta);
 
   const learn = page.content.filter((s) => isLearnSection(s.type));
@@ -223,6 +223,17 @@ export default async function ChapterPage({ params }: { params: Promise<Params> 
       </header>
 
       <ChapterShell
+        sections={[
+          ...learn.map((x) => ({
+            key: x.key,
+            title: x.type === "jargon" ? "Key terms" : x.title,
+            mode: "learn" as Mode,
+          })),
+          ...labs.map((x) => ({ key: x.key, title: x.title, mode: "practise" as Mode })),
+          ...stuck.map((x) => ({ key: x.key, title: x.title, mode: "practise" as Mode })),
+          ...(drill ? [{ key: drill.key, title: drill.title, mode: "decide" as Mode }] : []),
+          ...interview.map((x) => ({ key: x.key, title: x.title, mode: "review" as Mode })),
+        ]}
         pageKey={page.key}
         spec={spec}
         modes={modes}
@@ -352,22 +363,45 @@ export default async function ChapterPage({ params }: { params: Promise<Params> 
         )}
       </ChapterShell>
 
-      {next && (
-        <div className="wrap" style={{ paddingBottom: 48 }}>
-          <Link
-            className="next-ch"
-            href={pageHref(course, next)}
-            style={{ "--h": partHue(next.partNumber) } as CSSProperties}
-          >
-            <div>
-              <div className="k">Up next{next.label ? ` · ${next.label}` : ""}</div>
-              <div className="t">{next.title}</div>
-            </div>
-            <span style={{ marginLeft: "auto" }}>
-              <Icon name="arrow" />
-            </span>
-          </Link>
-        </div>
+      {(prev || next) && (
+        <nav
+          className="wrap chapter-nav"
+          aria-label="Previous and next chapter"
+          style={{ paddingBottom: 48 }}
+        >
+          {prev && (
+            <Link
+              className="next-ch"
+              rel="prev"
+              href={pageHref(course, prev)}
+              style={{ "--h": partHue(prev.partNumber) } as CSSProperties}
+            >
+              <span>
+                <Icon name="back" />
+              </span>
+              <div>
+                <div className="k">Previous{prev.label ? ` · ${prev.label}` : ""}</div>
+                <div className="t">{prev.title}</div>
+              </div>
+            </Link>
+          )}
+          {next && (
+            <Link
+              className="next-ch"
+              rel="next"
+              href={pageHref(course, next)}
+              style={{ "--h": partHue(next.partNumber) } as CSSProperties}
+            >
+              <div>
+                <div className="k">Up next{next.label ? ` · ${next.label}` : ""}</div>
+                <div className="t">{next.title}</div>
+              </div>
+              <span style={{ marginLeft: "auto" }}>
+                <Icon name="arrow" />
+              </span>
+            </Link>
+          )}
+        </nav>
       )}
       <CopyButtons />
     </main>

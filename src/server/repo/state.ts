@@ -1,6 +1,6 @@
 // Loads one learner's state for one course. Every query is filtered by the tenant and user in
 // `ctx` — the only way personal data leaves the database (architecture §8, ADR-0023).
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { addDays, weekStart } from "@/lib/dates";
 import { streakFrom, weekFrom } from "@/lib/engagement";
@@ -10,6 +10,7 @@ import { db as getDb } from "../db/client";
 import {
   activityDay,
   cardReview,
+  checkpointAttempt,
   drillAnswer,
   labCompletion,
   labStep,
@@ -80,6 +81,24 @@ export async function loadState(ctx: Ctx, course: string, today: string): Promis
         .where(and(eq(userSettings.tenantId, tenantId), eq(userSettings.userId, userId))),
     ]);
 
+  const [checkpoints, due] = await Promise.all([
+    db
+      .select({
+        part: checkpointAttempt.part,
+        attempts: sql<number>`count(*)::int`,
+        best: sql<number>`max(${checkpointAttempt.score})::int`,
+        passed: sql<boolean>`bool_or(${checkpointAttempt.passed})`,
+      })
+      .from(checkpointAttempt)
+      .where(mine(checkpointAttempt))
+      .groupBy(checkpointAttempt.part),
+    db
+      .select({ c: cardReview.cardKey })
+      .from(cardReview)
+      .where(and(mine(cardReview), lte(cardReview.dueAt, new Date())))
+      .orderBy(cardReview.dueAt),
+  ]);
+
   const state: LearnerState = {
     read: {},
     steps: {},
@@ -96,6 +115,13 @@ export async function loadState(ctx: Ctx, course: string, today: string): Promis
     },
     streak: { streak: 0, activeToday: false, freezesLeft: 0 },
     week: { days: [], active: 0, goal: 3 },
+    checkpoints: Object.fromEntries(
+      checkpoints.map((c) => [
+        String(c.part),
+        { attempts: c.attempts, best: c.best, passed: c.passed },
+      ]),
+    ),
+    due: due.map((d) => d.c),
   };
   for (const r of reads) (state.read[r.p] ??= []).push(r.s);
   for (const r of steps) ((state.steps[r.p] ??= {})[r.l] ??= []).push(r.s);

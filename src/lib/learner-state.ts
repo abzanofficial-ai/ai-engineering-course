@@ -13,6 +13,10 @@ export interface LearnerState {
   xp: { total: number; week: number; recent: { label: string; points: number; at: string }[] };
   streak: { streak: number; activeToday: boolean; freezesLeft: number };
   week: { days: { day: string; active: boolean }[]; active: number; goal: number };
+  /** Part number → checkpoint results (ADR-0021). */
+  checkpoints: Record<string, { attempts: number; best: number; passed: boolean }>;
+  /** Card keys due for spaced-repetition review now (ADR-0016). */
+  due: string[];
 }
 
 export const emptyState = (): LearnerState => ({
@@ -25,6 +29,8 @@ export const emptyState = (): LearnerState => ({
   xp: { total: 0, week: 0, recent: [] },
   streak: { streak: 0, activeToday: false, freezesLeft: 0 },
   week: { days: [], active: 0, goal: 3 },
+  checkpoints: {},
+  due: [],
 });
 
 const PRACTICE_TYPES: SectionType[] = ["lab", "stuck", "drill", "interview"];
@@ -120,6 +126,7 @@ export function applyLocal(state: LearnerState, op: Op): LearnerState {
       break;
     case "card":
       s.cards[op.card] = op.rating;
+      s.due = s.due.filter((k) => k !== op.card); // rated now, so not due until its next interval
       break;
     case "position":
       s.last = { pageKey: op.page, mode: op.mode, sectionIndex: op.index };

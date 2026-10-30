@@ -4,6 +4,32 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### M3 — Practice depth
+
+#### Added
+
+- Part checkpoints (ADR-0021): 10 questions from the part plus one decision drill; pass at 80%
+  confident with the drill answered; 200 XP once; unlimited attempts with a fresh set each time.
+  The server re-derives the question set for the attempt, validates and scores it (tenant-scoped
+  `checkpoint_attempt` table, migration 0003). Unsure answers join spaced-repetition review.
+- "Review due" page: every question due now across the course, one at a time; the route shows
+  how many are waiting.
+- Checkpoint cards on the route (not started / best score / passed).
+- Sticky Sections menu in every chapter: all sections grouped by mode, read ticks, jumps to the
+  right mode and card, closes with Escape.
+- Previous chapter link alongside Up next.
+- Data export includes checkpoint attempts.
+
+#### Fixed
+
+- The checkpoint result screen lost its "to revisit" list because saving the attempt changed the
+  attempt number; the question set is now frozen when the learner presses Start.
+
+#### Tests
+
+- Checkpoint rules (unit), checkpoint API (pass/fail, XP once, mismatched sets rejected, review
+  queue, isolation), tenant-scoped attempts, and Playwright journeys with axe checks.
+
 ### Future-proofing for white-label, LMS integration and billing (owner request)
 
 #### Added

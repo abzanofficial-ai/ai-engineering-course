@@ -5,6 +5,7 @@ import nextTs from "eslint-config-next/typescript";
 const HTML_RENDERERS = [
   "src/components/route-view.tsx",
   "src/components/chapter/**/*.tsx",
+  "src/components/checkpoint-flow.tsx",
   "src/app/learn/**/page.tsx",
   "src/app/layout.tsx",
 ];

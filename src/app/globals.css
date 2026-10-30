@@ -753,6 +753,33 @@ li a:not(.ch):not(.check-card) {
 .mini.done::after {
   display: none;
 }
+.check-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px dashed var(--c);
+  text-decoration: none;
+  color: var(--ink);
+}
+.check-card.passed {
+  border-style: solid;
+  background: hsl(var(--h) var(--ts) var(--tl));
+}
+.check-card .k {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--c);
+}
+.check-card .t {
+  font-weight: 600;
+}
+.review-due {
+  border: 1px solid var(--review);
+}
 .soon-list {
   margin: 6px 0 0;
   font-size: 14px;
@@ -832,11 +859,97 @@ li a:not(.ch):not(.check-card) {
   background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
-.tabs .wrap {
+.tabs .tablist {
   display: grid;
   grid-template-columns: repeat(var(--n), minmax(0, 1fr));
   gap: 4px;
   padding-block: 6px;
+}
+.sections-bar {
+  position: relative;
+  padding-block: 0 6px;
+}
+.sections-toggle {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+.sections-current {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.sections-toggle[aria-expanded="true"] .chev {
+  transform: rotate(180deg);
+}
+.sections-panel {
+  position: absolute;
+  left: max(16px, env(safe-area-inset-left, 0px));
+  right: max(16px, env(safe-area-inset-right, 0px));
+  top: calc(100% - 2px);
+  max-height: min(70vh, 32rem);
+  overflow-y: auto;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 8px 12px 12px;
+  z-index: 25;
+}
+.sections-mode {
+  margin: 10px 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mode);
+}
+.sections-panel ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sections-panel button {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+.sections-panel button[aria-current="location"] {
+  background: var(--mode-bg);
+  font-weight: 700;
+}
+.sections-panel .icon {
+  color: var(--practise);
+}
+.chapter-nav {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
 }
 .tab {
   display: grid;
