@@ -41,6 +41,9 @@ describe("applyOps", () => {
     expect(again).toEqual([{ ok: true }, { ok: true }]);
 
     const s = await state(u);
+    const utcToday = new Date().toISOString().slice(0, 10);
+    // This week's activity chart: today's XP (by UTC date) is the 100 points just earned.
+    expect(s.week.days.find((d) => d.day === utcToday)?.xp).toBe(100);
     expect(s.read["ch-1"]).toEqual(["what-it-is"]);
     expect(s.steps["ch-1"]!["lab"]).toEqual([lab.steps![0]!.key]);
     expect(s.commits["ch-1"]).toEqual(["lab"]);

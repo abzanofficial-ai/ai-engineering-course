@@ -8,6 +8,17 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 #### Added
 
+- New look across the app: a soft blue-lavender background with gentle glows, light cards with
+  rounder corners and soft shadows, an indigo accent, and a translucent header. Dark mode has
+  its own navy and indigo equivalents. Every colour pair was checked for WCAG AA contrast
+  (design-system §6).
+- Dashboard revision:
+  - a "My activity" chart of XP per day this week;
+  - "Up next" (where you left off, then review or the next chapter);
+  - streak, XP and days this week in the header;
+  - a side column with the next part checkpoint, a course progress ring and the chapters in
+    progress.
+
 - `/` is now the learner's home (ADR-0028). It has:
   - side navigation: Courses, Learning path, My progress, Review due, Notes and bookmarks,
     Glossary, and Certificates (marked "soon"); on phones it becomes a scrolling row;

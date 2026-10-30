@@ -265,3 +265,38 @@ Intro (rules: 10 questions + 1 drill, pass at 80 % confident) → one question p
 ### 5.5 Typography update
 
 Display face: Bricolage Grotesque (self-hosted via `next/font`, weights 600/800, used for headings and numbers only); body remains the system stack for speed.
+
+## 6. Revision 3 — soft palette and the learner dashboard (owner reference, 2026-10-30)
+
+Owner: Senior UI/UX Designer. The owner asked for a calmer, lighter look across the app and a
+dashboard with activity and progress at a glance.
+
+### 6.1 Palette (tokens in `src/app/globals.css`; every pair checked by calculation)
+
+| Token                    | Light                           | Dark                     | Check                                    |
+| ------------------------ | ------------------------------- | ------------------------ | ---------------------------------------- |
+| `--bg` (page)            | `#e9eef7` + lavender/blue glows | `#0e1124` + indigo glows | —                                        |
+| `--raised` (cards)       | `#fbfcff`                       | `#1c2039`                | —                                        |
+| `--ink`                  | `#1c1f3a`                       | `#eceefa`                | 15.7 / 13.8 : 1                          |
+| `--muted`                | `#565d78`                       | `#a7adc8`                | ≥ 5.6 / 7.2 : 1 on page and cards        |
+| `--accent`               | `#4f46e5` (indigo)              | `#a8abff`                | 6.1 / 7.6 : 1; button text 6.3 / 8.8 : 1 |
+| `--edge` (field borders) | `#868ea8`                       | `#6b7396`                | ≥ 3.2 : 1                                |
+| `--bar-past` (chart)     | `#827dec`                       | `#6a67d8`                | ≥ 3.3 : 1 against cards                  |
+
+Cards use a shared `--radius` of 20px and a soft two-layer shadow. The header is translucent
+with a blur. Part hues on the route and chapter headers are unchanged: they identify parts.
+
+### 6.2 Dashboard (`/`, ADR-0028)
+
+Three columns on wide screens (navigation · main · side column); one column on phones with the
+navigation as a scrolling row.
+
+- **Header:** "Home", a welcome, and streak · XP · days this week.
+- **My activity:** XP per day this week as a single-series bar chart. Today is solid accent;
+  other days are a lighter step of the same hue; days with no XP show a baseline stub. Only
+  today and the best day carry a value label; every bar shows its value on hover; a hidden table
+  gives screen readers the same numbers.
+- **Up next:** where you left off, then questions due for review (or the next chapter).
+- **Courses:** a card per course with level, summary, size, progress and Start/Continue.
+- **Side column:** a call to action for the next part checkpoint, a progress ring for the course,
+  and the chapters in progress (then the next ones to start).

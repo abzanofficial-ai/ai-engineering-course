@@ -12,7 +12,7 @@ export interface LearnerState {
   last: { pageKey: string; mode: string; sectionIndex: number } | null;
   xp: { total: number; week: number; recent: { label: string; points: number; at: string }[] };
   streak: { streak: number; activeToday: boolean; freezesLeft: number };
-  week: { days: { day: string; active: boolean }[]; active: number; goal: number };
+  week: { days: { day: string; active: boolean; xp: number }[]; active: number; goal: number };
   /** Part number → checkpoint results (ADR-0021). */
   checkpoints: Record<string, { attempts: number; best: number; passed: boolean }>;
   /** Card keys due for spaced-repetition review now (ADR-0016). */

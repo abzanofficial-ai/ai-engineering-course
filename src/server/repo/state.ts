@@ -83,7 +83,7 @@ export async function loadState(ctx: Ctx, course: string, today: string): Promis
         .where(and(eq(userSettings.tenantId, tenantId), eq(userSettings.userId, userId))),
     ]);
 
-  const [checkpoints, due, marks, notes] = await Promise.all([
+  const [checkpoints, due, marks, notes, xpDays] = await Promise.all([
     db
       .select({
         part: checkpointAttempt.part,
@@ -114,6 +114,15 @@ export async function loadState(ctx: Ctx, course: string, today: string): Promis
       .from(note)
       .where(and(mine(note), eq(note.deleted, false)))
       .orderBy(desc(note.clientTs)),
+    // XP per day this week, for the activity chart (days are UTC dates of the events).
+    db
+      .select({
+        d: sql<string>`to_char(${xpEvent.createdAt} at time zone 'UTC', 'YYYY-MM-DD')`,
+        n: sql<number>`sum(${xpEvent.points})::int`,
+      })
+      .from(xpEvent)
+      .where(and(mine(xpEvent), gte(xpEvent.createdAt, new Date(`${weekStart(today)}T00:00:00Z`))))
+      .groupBy(sql`1`),
   ]);
 
   const state: LearnerState = {
@@ -150,6 +159,6 @@ export async function loadState(ctx: Ctx, course: string, today: string): Promis
   for (const r of cards) state.cards[r.c] = r.r as "confident" | "unsure";
   const daySet = new Set(days.map((d) => d.d));
   state.streak = streakFrom(daySet, today);
-  state.week = weekFrom(daySet, today, settings[0]?.g ?? 3);
+  state.week = weekFrom(daySet, today, settings[0]?.g ?? 3, new Map(xpDays.map((r) => [r.d, r.n])));
   return state;
 }

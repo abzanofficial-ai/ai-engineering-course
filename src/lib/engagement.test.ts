@@ -54,6 +54,18 @@ describe("weekFrom and goals", () => {
     expect(w.days).toHaveLength(7);
     expect(w.active).toBe(2);
   });
+  it("carries XP per day, zero when none", () => {
+    const w = weekFrom(
+      new Set([T]),
+      T,
+      3,
+      new Map([
+        [T, 45],
+        ["2026-10-19", 99],
+      ]),
+    );
+    expect(w.days.map((d) => d.xp)).toEqual(w.days.map((d) => (d.day === T ? 45 : 0)));
+  });
   it("clamps the goal to 1–7", () => {
     expect([0, 3, 9, 2.6].map(clampGoal)).toEqual([1, 3, 7, 3]);
   });

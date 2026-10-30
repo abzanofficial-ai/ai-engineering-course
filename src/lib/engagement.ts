@@ -51,16 +51,22 @@ export function streakFrom(days: ReadonlySet<string>, today: string): StreakInfo
 }
 
 export interface WeekInfo {
-  days: { day: string; active: boolean }[];
+  /** Monday to Sunday; `xp` is points earned that day (UTC date of the event). */
+  days: { day: string; active: boolean; xp: number }[];
   active: number;
   goal: number;
 }
 
-export function weekFrom(days: ReadonlySet<string>, today: string, goal: number): WeekInfo {
+export function weekFrom(
+  days: ReadonlySet<string>,
+  today: string,
+  goal: number,
+  xpByDay: ReadonlyMap<string, number> = new Map(),
+): WeekInfo {
   const start = weekStart(today);
   const list = Array.from({ length: 7 }, (_, i) => {
     const day = addDays(start, i);
-    return { day, active: days.has(day) };
+    return { day, active: days.has(day), xp: xpByDay.get(day) ?? 0 };
   });
   return { days: list, active: list.filter((d) => d.active).length, goal };
 }

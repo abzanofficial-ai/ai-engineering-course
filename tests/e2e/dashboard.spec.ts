@@ -38,7 +38,15 @@ test("signed in, home shows progress and continues where the learner left off", 
   await expect(page).toHaveURL(/\/$/);
   const card = page.getByRole("article", { name: "The AI Engineering Handbook" });
   await expect(card.getByRole("progressbar")).toBeVisible();
-  await expect(page.getByRole("region", { name: "This week" })).toContainText("XP earned");
+  const activity = page.getByRole("region", { name: "My activity" });
+  await expect(activity).toContainText(/\d+ XP this week/);
+  await expect(activity.getByRole("table")).toContainText("(today)");
+  await expect(page.getByRole("list", { name: "Up next" })).toContainText(
+    "Chapter 1: Python for AI Engineering",
+  );
+  await expect(page.getByRole("complementary", { name: "Next steps" })).toContainText(
+    "Take the checkpoint",
+  );
   await card.getByRole("link", { name: "Continue: The AI Engineering Handbook" }).click();
   await expect(page).toHaveURL(/1-python-for-ai-engineering/);
 });
@@ -50,7 +58,7 @@ for (const scheme of ["light", "dark"] as const) {
     await expect(page.getByRole("article")).toBeVisible();
     await noViolations(page);
     await signIn(page, newEmail(`dash-a11y-${scheme}`), "/");
-    await expect(page.getByRole("region", { name: "This week" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "My activity" })).toBeVisible();
     await noViolations(page);
   });
 }

@@ -19,8 +19,8 @@
       "hsl(330 65% 52%)",
       "hsl(25 85% 50%)"
     ],
-    "themeLight": "#ffffff",
-    "themeDark": "#0e1116"
+    "themeLight": "#e9eef7",
+    "themeDark": "#0e1124"
   },
   "email": { "fromName": "AI Engineering Handbook", "fromAddress": "no-reply@example.com" },
   "supportEmail": "support@example.com",

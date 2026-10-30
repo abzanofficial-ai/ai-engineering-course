@@ -19,6 +19,10 @@ learner can take, so new courses (and, later, subscribed or purchased ones) appe
   from `/api/me/state` (tenant- and user-scoped as before).
 - "Start course" opens the course's learning path; "Continue" opens the last page visited.
 - Certificates show as "soon" until M5.
+- **Revision (same day):** the owner's second reference added a weekly activity chart (XP per
+  day, from `xp_event`, grouped by the UTC date of each event), an "Up next" list, a progress
+  ring, a checkpoint call to action and a chapter list in a side column, plus a new app-wide
+  palette (design-system §6). The learner state now carries `week.days[].xp`.
 - The brand link and the installed app's start URL now go to `/`.
 
 ## Later

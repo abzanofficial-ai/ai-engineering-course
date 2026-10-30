@@ -1,12 +1,20 @@
 "use client";
 
-// The learner's home (ADR-0028): every course they can take, with live progress, and the
-// places they return to. Courses come from content/courses.json, so new ones appear here.
+// The learner's home (ADR-0028): this week's activity, what to do next, every course they can
+// take with live progress, and a side column with the next checkpoint and chapters in progress.
+// Courses come from content/courses.json, so new ones appear here.
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { DashboardCourse } from "@/lib/dashboard-data";
 import { localDay } from "@/lib/dates";
-import { courseProgress, emptyState, type LearnerState } from "@/lib/learner-state";
+import {
+  averageProgress,
+  courseProgress,
+  emptyState,
+  pageProgress,
+  type LearnerState,
+} from "@/lib/learner-state";
+import { ActivityChart } from "./activity-chart";
 import { Icon } from "./icons";
 import { useLearner } from "./learner/provider";
 
@@ -30,6 +38,32 @@ function useCourseState(slug: string, providerCourse: string): LearnerState | nu
   }, [own, slug, status]);
   if (status !== "ready") return null;
   return own ? state : other;
+}
+
+const pageName = (p: { label: string; title: string }) =>
+  p.label ? `${p.label}: ${p.title}` : p.title;
+
+function Ring({ pct, label }: { pct: number; label: string }) {
+  const r = 26;
+  const c = 2 * Math.PI * r;
+  return (
+    <svg className="ring" viewBox="0 0 64 64" role="img" aria-label={label}>
+      <circle cx="32" cy="32" r={r} className="ring-track" />
+      {pct > 0 && (
+        <circle
+          cx="32"
+          cy="32"
+          r={r}
+          className="ring-fill"
+          strokeDasharray={`${(pct / 100) * c} ${c}`}
+          transform="rotate(-90 32 32)"
+        />
+      )}
+      <text x="32" y="37" textAnchor="middle">
+        {pct}%
+      </text>
+    </svg>
+  );
 }
 
 function CourseCard({
@@ -88,6 +122,53 @@ function CourseCard({
   );
 }
 
+/** "Up next": where the learner left off, and what is waiting for them. */
+function UpNext({ course, state }: { course: DashboardCourse; state: LearnerState }) {
+  const specs = new Map(course.parts.flat().map((s) => [s.key, s]));
+  const last = state.last && course.pages.find((p) => p.key === state.last!.pageKey);
+  const lastIdx = last ? course.pages.indexOf(last) : -1;
+  const next = course.pages
+    .slice(lastIdx + 1)
+    .find((p) => pageProgress(specs.get(p.key)!, state) < 100);
+  const items = [
+    last && {
+      key: "continue",
+      tag: "Continue",
+      title: pageName(last),
+      href: `/learn/${course.slug}/${last.slug}`,
+      icon: "learn",
+    },
+    state.due.length > 0
+      ? {
+          key: "review",
+          tag: "Review",
+          title: `${state.due.length} question${state.due.length === 1 ? "" : "s"} due`,
+          href: "/review",
+          icon: "review",
+        }
+      : next && {
+          key: "next",
+          tag: "Up next",
+          title: pageName(next),
+          href: `/learn/${course.slug}/${next.slug}`,
+          icon: "arrow",
+        },
+  ].filter(Boolean) as { key: string; tag: string; title: string; href: string; icon: string }[];
+  if (!items.length) return null;
+  return (
+    <ul className="up-next" aria-label="Up next">
+      {items.map((it) => (
+        <li key={it.key}>
+          <Link href={it.href} className="up-item">
+            <span className="up-tag">{it.tag}</span>
+            <span className="up-title">{it.title}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function Dashboard({
   courses,
   providerCourse,
@@ -109,9 +190,25 @@ export function Dashboard({
   }, []);
   const main = `/learn/${providerCourse}`;
   const firstName = user?.name?.split(" ")[0];
+  const course = courses.find((c) => c.slug === providerCourse) ?? courses[0]!;
+  const specs = new Map(course.parts.flat().map((s) => [s.key, s]));
+  const pct = courseProgress(course.parts, state);
+
+  // The next part checkpoint not yet passed (ADR-0021), as the side column's call to action.
+  const nextCheckpoint = course.partNumbers
+    .map((n, i) => ({ n, pct: averageProgress(course.parts[i]!, state) ?? 0 }))
+    .find(({ n }) => n > 0 && !state.checkpoints[String(n)]?.passed);
+
+  // Chapters in progress first, then the next ones not started.
+  const inProgress = course.pages.filter((p) => {
+    const v = pageProgress(specs.get(p.key)!, state);
+    return v > 0 && v < 100;
+  });
+  const fresh = course.pages.filter((p) => pageProgress(specs.get(p.key)!, state) === 0);
+  const chapterList = [...inProgress, ...fresh].slice(0, 4);
 
   const nav = [
-    { href: "/", label: "Courses", icon: "courses", current: true },
+    { href: "/", label: "Home", icon: "courses", current: true },
     { href: main, label: "Learning path", icon: "path" },
     { href: "/progress", label: "My progress", icon: "chart" },
     { href: "/review", label: "Review due", icon: "review" },
@@ -140,19 +237,6 @@ export function Dashboard({
             </span>
           </li>
         </ul>
-        <div className="dash-aside">
-          {signedIn ? (
-            <p>
-              Keep your streak going: <strong>{state.week.active}</strong> of{" "}
-              <strong>{state.week.goal}</strong> learning days this week.
-            </p>
-          ) : (
-            <p>
-              <Link href="/sign-in">Create a free account</Link> to save progress, earn XP and keep
-              a streak on every device.
-            </p>
-          )}
-        </div>
       </nav>
 
       <main id="main" className="dash-main">
@@ -162,50 +246,119 @@ export function Dashboard({
           </p>
         )}
         <header className="dash-head">
-          <h1>{signedIn && firstName ? `Welcome back, ${firstName}` : "Your courses"}</h1>
-          <p>{intro}</p>
+          <div>
+            <h1>{signedIn ? "Home" : "Your courses"}</h1>
+            <p>{signedIn ? `Welcome back${firstName ? `, ${firstName}` : ""}!` : intro}</p>
+          </div>
+          {signedIn && (
+            <dl className="dash-kpis">
+              <div>
+                <dt>
+                  <Icon name="flame" /> Streak
+                </dt>
+                <dd>
+                  {state.streak.streak} day{state.streak.streak === 1 ? "" : "s"}
+                </dd>
+              </div>
+              <div>
+                <dt>
+                  <Icon name="star" /> XP
+                </dt>
+                <dd>{state.xp.total}</dd>
+              </div>
+              <div>
+                <dt>
+                  <Icon name="check" /> This week
+                </dt>
+                <dd>
+                  {state.week.active}/{state.week.goal} days
+                </dd>
+              </div>
+            </dl>
+          )}
         </header>
 
+        {signedIn && (
+          <section className="panel activity-panel" aria-labelledby="activity-h">
+            <div className="panel-head">
+              <h2 id="activity-h">My activity</h2>
+              <Link href="/progress" className="see-all">
+                See all <Icon name="arrow" />
+              </Link>
+            </div>
+            <div className="activity-grid">
+              <ActivityChart days={state.week.days} today={localDay()} />
+              <UpNext course={course} state={state} />
+            </div>
+          </section>
+        )}
+
         <section aria-labelledby="courses-h" className="dash-courses">
-          <h2 id="courses-h">
-            <Icon name="courses" /> {courses.length === 1 ? "Your course" : "Courses"}
-          </h2>
+          <div className="panel-head">
+            <h2 id="courses-h">{courses.length === 1 ? "Your course" : "Courses"}</h2>
+          </div>
           {courses.map((c) => (
             <CourseCard key={c.slug} course={c} providerCourse={providerCourse} />
           ))}
         </section>
+      </main>
+
+      <aside className="dash-rail" aria-label="Next steps">
+        {signedIn && nextCheckpoint ? (
+          <Link className="cta-card" href={`${main}/checkpoint/${nextCheckpoint.n}`}>
+            <span className="cta-text">Test yourself on Part {nextCheckpoint.n}</span>
+            <span className="cta-btn">Take the checkpoint</span>
+          </Link>
+        ) : !signedIn ? (
+          <Link className="cta-card" href="/sign-in">
+            <span className="cta-text">Save your progress on every device</span>
+            <span className="cta-btn">Create a free account</span>
+          </Link>
+        ) : null}
 
         {signedIn && (
-          <section aria-label="This week" className="dash-stats">
-            <Link href="/progress" className="dash-stat">
-              <span className="flame">
-                <Icon name="flame" />
-              </span>
-              <b>{state.streak.streak}</b>
-              <span>day streak</span>
-            </Link>
-            <Link href="/progress" className="dash-stat">
-              <span className="star">
-                <Icon name="star" />
-              </span>
-              <b>{state.xp.total}</b>
-              <span>XP earned</span>
-            </Link>
-            <Link href="/progress" className="dash-stat">
-              <Icon name="check" />
-              <b>
-                {state.week.active}/{state.week.goal}
-              </b>
-              <span>days this week</span>
-            </Link>
-            <Link href="/review" className="dash-stat">
-              <Icon name="review" />
-              <b>{state.due.length}</b>
-              <span>to review</span>
-            </Link>
-          </section>
+          <div className="panel ring-card">
+            <div>
+              <h2 className="ring-title">{course.title}</h2>
+              <p className="muted small">
+                {course.counts.chapters} chapters · goal {state.week.goal} days a week
+              </p>
+            </div>
+            <Ring pct={pct} label={`${pct}% of the course complete`} />
+          </div>
         )}
-      </main>
+
+        <section className="panel chapter-list" aria-labelledby="chapters-h">
+          <div className="panel-head">
+            <h2 id="chapters-h">{inProgress.length ? "Your chapters" : "Start here"}</h2>
+            <Link href={main} className="see-all">
+              All <Icon name="arrow" />
+            </Link>
+          </div>
+          <ul>
+            {chapterList.map((p) => {
+              const spec = specs.get(p.key)!;
+              const v = pageProgress(spec, state);
+              return (
+                <li key={p.key}>
+                  <Link href={`${main}/${p.slug}`} className="chapter-row">
+                    <span className="chapter-row-text">
+                      <span className="chapter-row-title">{pageName(p)}</span>
+                      <span className="chapter-row-meta">
+                        {spec.learn.length} sections
+                        {spec.labs.length > 0 &&
+                          ` · ${spec.labs.length} lab${spec.labs.length === 1 ? "" : "s"}`}
+                        {signedIn && v > 0 ? ` · ${v}%` : ""}
+                      </span>
+                    </span>
+                    <Icon name="arrow" />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </aside>
     </div>
   );
 }

@@ -12,6 +12,10 @@ export interface DashboardCourse {
   icon: CourseEntry["icon"];
   /** Published pages' progress specs, grouped by part (for the course %). */
   parts: PageSpec[][];
+  /** The part number of each group in `parts` (for checkpoints). */
+  partNumbers: number[];
+  /** Published pages in course order, for "Up next" and the chapter list. */
+  pages: { key: string; slug: string; label: string; title: string }[];
   /** Page key → slug, to resume where the learner left off. */
   slugs: Record<string, string>;
   firstSlug: string | null;
@@ -20,15 +24,21 @@ export interface DashboardCourse {
 
 export function dashboardCourse(entry: CourseEntry, m: CourseManifest): DashboardCourse {
   const published = m.pages.filter((p) => p.status === "published");
+  const groups = m.parts
+    .map((part) => ({
+      number: part.number,
+      specs: published.filter((p) => p.partNumber === part.number).map((p) => specOf(p)),
+    }))
+    .filter((g) => g.specs.length > 0);
   return {
     slug: entry.slug,
     title: entry.title ?? m.title,
     level: entry.level ?? null,
     summary: entry.summary ?? null,
     icon: entry.icon,
-    parts: m.parts
-      .map((part) => published.filter((p) => p.partNumber === part.number).map((p) => specOf(p)))
-      .filter((specs) => specs.length > 0),
+    parts: groups.map((g) => g.specs),
+    partNumbers: groups.map((g) => g.number),
+    pages: published.map((p) => ({ key: p.key, slug: p.slug, label: p.label, title: p.title })),
     slugs: Object.fromEntries(published.map((p) => [p.key, p.slug])),
     firstSlug: published[0]?.slug ?? null,
     counts: {
