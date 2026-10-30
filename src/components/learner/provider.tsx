@@ -193,7 +193,11 @@ export function LearnerProvider({ course, children }: { course: string; children
       snapshotKey.current = `snapshot:${course}:${remembered.email}`;
       const queued = storage.read<Op[]>(outboxKey.current, []);
       setUser(remembered);
-      setServer(storage.read<LearnerState>(snapshotKey.current, emptyState()));
+      // Snapshots saved by an older version lack newer fields.
+      setServer({
+        ...emptyState(),
+        ...storage.read<Partial<LearnerState>>(snapshotKey.current, {}),
+      });
       pendingRef.current = queued;
       setPending(queued);
       setSave("offline");

@@ -138,6 +138,11 @@ export function RouteView({ data }: { data: RouteData }) {
           <Link href={`/learn/${data.course}/glossary`}>
             <Icon name="tag" /> Glossary
           </Link>
+          {signedIn && (
+            <Link href="/notes">
+              <Icon name="note" /> Notes and bookmarks
+            </Link>
+          )}
         </p>
       </section>
 

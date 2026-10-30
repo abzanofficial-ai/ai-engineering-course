@@ -23,6 +23,9 @@ describe("needsSession", () => {
     ["/admin/content", true],
     ["/sign-in", false],
     ["/review", true],
+    ["/notes", true],
+    ["/search", false],
+    [`${L}/glossary`, false],
     [`${L}/checkpoint/1`, true],
     ["/learn/unknown-course/x", false],
   ])("%s → %s", (path, expected) => expect(needsSession(path, courses)).toBe(expected));

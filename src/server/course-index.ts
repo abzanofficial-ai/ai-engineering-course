@@ -8,6 +8,7 @@ import type { CourseManifest } from "@/content/types";
 export interface CourseIndex {
   manifest: CourseManifest;
   learnSections: Map<string, Set<string>>; // pageKey → learn section keys
+  sections: Map<string, Set<string>>; // pageKey → every section key
   labSteps: Map<string, Map<string, Set<string>>>; // pageKey → labKey → step keys
   drills: Set<string>; // pageKeys with a drill
   cards: Map<string, string>; // cardKey → pageKey
@@ -24,6 +25,7 @@ export function courseIndex(course: string): CourseIndex | null {
   const idx: CourseIndex = {
     manifest: g.manifest,
     learnSections: new Map(),
+    sections: new Map(),
     labSteps: new Map(),
     drills: new Set(),
     cards: new Map(),
@@ -36,6 +38,7 @@ export function courseIndex(course: string): CourseIndex | null {
       page.key,
       new Set(page.sections.filter((s) => isLearnSection(s.type)).map((s) => s.key)),
     );
+    idx.sections.set(page.key, new Set(page.sections.map((s) => s.key)));
     const labs = new Map<string, Set<string>>();
     for (const s of page.sections)
       if (s.type === "lab") labs.set(s.key, new Set((s.steps ?? []).map((st) => st.key)));

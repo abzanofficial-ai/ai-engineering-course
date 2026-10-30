@@ -9,12 +9,14 @@ import type { Ctx } from "../context";
 import { db as getDb } from "../db/client";
 import {
   activityDay,
+  bookmark,
   cardReview,
   checkpointAttempt,
   drillAnswer,
   labCompletion,
   labStep,
   lastPosition,
+  note,
   sectionProgress,
   userSettings,
   xpEvent,
@@ -81,7 +83,7 @@ export async function loadState(ctx: Ctx, course: string, today: string): Promis
         .where(and(eq(userSettings.tenantId, tenantId), eq(userSettings.userId, userId))),
     ]);
 
-  const [checkpoints, due] = await Promise.all([
+  const [checkpoints, due, marks, notes] = await Promise.all([
     db
       .select({
         part: checkpointAttempt.part,
@@ -97,6 +99,21 @@ export async function loadState(ctx: Ctx, course: string, today: string): Promis
       .from(cardReview)
       .where(and(mine(cardReview), lte(cardReview.dueAt, new Date())))
       .orderBy(cardReview.dueAt),
+    db
+      .select({ p: bookmark.pageKey, s: bookmark.sectionKey })
+      .from(bookmark)
+      .where(and(mine(bookmark), eq(bookmark.on, true))),
+    db
+      .select({
+        id: note.id,
+        page: note.pageKey,
+        section: note.sectionKey,
+        body: note.body,
+        ts: note.clientTs,
+      })
+      .from(note)
+      .where(and(mine(note), eq(note.deleted, false)))
+      .orderBy(desc(note.clientTs)),
   ]);
 
   const state: LearnerState = {
@@ -122,7 +139,10 @@ export async function loadState(ctx: Ctx, course: string, today: string): Promis
       ]),
     ),
     due: due.map((d) => d.c),
+    bookmarks: {},
+    notes,
   };
+  for (const r of marks) (state.bookmarks[r.p] ??= []).push(r.s);
   for (const r of reads) (state.read[r.p] ??= []).push(r.s);
   for (const r of steps) ((state.steps[r.p] ??= {})[r.l] ??= []).push(r.s);
   for (const r of commits) (state.commits[r.p] ??= []).push(r.l);

@@ -32,3 +32,15 @@ COMMIT;
 ```
 
 Then deploy the previous application version.
+
+## Rolling back migration 0004 (notes and bookmarks)
+
+Additive only. Deploy the previous application version first, then (after exporting the tables
+if any learner data must be kept):
+
+```sql
+BEGIN;
+DROP TABLE "note"; DROP TABLE "bookmark";
+DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrations" ORDER BY created_at DESC LIMIT 1);
+COMMIT;
+```

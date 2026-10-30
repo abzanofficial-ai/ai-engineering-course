@@ -14,8 +14,10 @@ import {
   cardReview,
   drillAnswer,
   labCompletion,
+  bookmark,
   labStep,
   lastPosition,
+  note,
   sectionProgress,
   userSettings,
   xpEvent,
@@ -75,7 +77,11 @@ function validate(op: Op, idx: CourseIndex): string | null {
     case "position":
       return idx.pages.has(op.page) ? null : "unknown page";
     case "goal":
+    case "note_delete":
       return null;
+    case "bookmark":
+    case "note_save":
+      return idx.sections.get(op.page)?.has(op.section) ? null : "unknown section";
   }
 }
 
@@ -300,11 +306,71 @@ export async function applyOps(ctx: Ctx, batch: Batch, now = new Date()): Promis
               set: { weeklyGoal: clampGoal(op.weeklyGoal), updatedAt: now },
             });
           break;
+        case "bookmark":
+          await tx
+            .insert(bookmark)
+            .values({
+              tenantId,
+              userId,
+              course,
+              pageKey: op.page,
+              sectionKey: op.section,
+              on: op.on,
+              clientTs: op.ts,
+            })
+            .onConflictDoUpdate({
+              target: [
+                bookmark.tenantId,
+                bookmark.userId,
+                bookmark.course,
+                bookmark.pageKey,
+                bookmark.sectionKey,
+              ],
+              set: { on: op.on, clientTs: op.ts, updatedAt: now },
+              setWhere: sql`${bookmark.clientTs} <= ${op.ts}`,
+            });
+          break;
+        case "note_save":
+          // The id is the learner's own namespace (tenant, user, id): another learner's id
+          // creates a separate note and can never touch theirs.
+          await tx
+            .insert(note)
+            .values({
+              tenantId,
+              userId,
+              id: op.id,
+              course,
+              pageKey: op.page,
+              sectionKey: op.section,
+              body: op.body,
+              clientTs: op.ts,
+            })
+            .onConflictDoUpdate({
+              target: [note.tenantId, note.userId, note.id],
+              set: { body: op.body, clientTs: op.ts, updatedAt: now },
+              setWhere: sql`${note.deleted} = false and ${note.clientTs} <= ${op.ts}`,
+            });
+          break;
+        case "note_delete":
+          // Deleting is final and erases the text; the row stays as a tombstone for sync.
+          await tx
+            .update(note)
+            .set({ deleted: true, body: "", clientTs: op.ts, updatedAt: now })
+            .where(
+              and(
+                eq(note.tenantId, tenantId),
+                eq(note.userId, userId),
+                eq(note.course, course),
+                eq(note.id, op.id),
+              ),
+            );
+          break;
       }
       results.push(xp ? { ok: true, xp } : { ok: true });
     }
     // Any learning action counts towards the streak, even when its XP was already earned.
-    if (results.some((r, i) => r.ok && !["position", "goal"].includes(batch.ops[i]!.type))) {
+    const NOT_LEARNING = ["position", "goal", "bookmark", "note_save", "note_delete"];
+    if (results.some((r, i) => r.ok && !NOT_LEARNING.includes(batch.ops[i]!.type))) {
       await tx.insert(activityDay).values({ tenantId, userId, day }).onConflictDoNothing();
     }
     return results;

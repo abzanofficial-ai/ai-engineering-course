@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Icon } from "../icons";
+import { SectionTools } from "../section-tools";
 import { useLearner } from "../learner/provider";
 import { SaveStatus, useChapter } from "./shell";
 
@@ -60,7 +61,7 @@ export function LearnCard({
   title: string;
   children: ReactNode;
 }) {
-  const { learnIndex } = useChapter();
+  const { learnIndex, pageKey } = useChapter();
   return (
     <article
       className="card"
@@ -73,6 +74,7 @@ export function LearnCard({
         {title}
       </h3>
       <div style={{ marginTop: 14 }}>{children}</div>
+      <SectionTools pageKey={pageKey} sectionKey={sectionKey} title={title} />
     </article>
   );
 }

@@ -17,6 +17,17 @@ export interface LearnerState {
   checkpoints: Record<string, { attempts: number; best: number; passed: boolean }>;
   /** Card keys due for spaced-repetition review now (ADR-0016). */
   due: string[];
+  bookmarks: Record<string, string[]>; // pageKey → bookmarked section keys
+  /** The learner's own notes, newest first (ADR-0027). Shown as text, never as HTML. */
+  notes: Note[];
+}
+
+export interface Note {
+  id: string;
+  page: string;
+  section: string;
+  body: string;
+  ts: number;
 }
 
 export const emptyState = (): LearnerState => ({
@@ -31,6 +42,8 @@ export const emptyState = (): LearnerState => ({
   week: { days: [], active: 0, goal: 3 },
   checkpoints: {},
   due: [],
+  bookmarks: {},
+  notes: [],
 });
 
 const PRACTICE_TYPES: SectionType[] = ["lab", "stuck", "drill", "interview"];
@@ -133,6 +146,27 @@ export function applyLocal(state: LearnerState, op: Op): LearnerState {
       break;
     case "goal":
       s.week = { ...s.week, goal: Math.min(7, Math.max(1, op.weeklyGoal)) };
+      break;
+    case "bookmark": {
+      const cur = s.bookmarks[op.page] ?? [];
+      s.bookmarks[op.page] = op.on
+        ? uniq([...cur, op.section])
+        : cur.filter((k) => k !== op.section);
+      break;
+    }
+    case "note_save": {
+      const note: Note = {
+        id: op.id,
+        page: op.page,
+        section: op.section,
+        body: op.body.trim(),
+        ts: op.ts,
+      };
+      s.notes = [note, ...s.notes.filter((n) => n.id !== op.id)];
+      break;
+    }
+    case "note_delete":
+      s.notes = s.notes.filter((n) => n.id !== op.id);
       break;
   }
   return s;

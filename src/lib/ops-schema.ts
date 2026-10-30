@@ -4,6 +4,7 @@ import { isDay } from "./dates";
 
 const key = z.string().min(1).max(200);
 const ts = z.number().int().nonnegative();
+export const NOTE_MAX = 5_000;
 export const MODES = ["learn", "practise", "decide", "review"] as const;
 export type Mode = (typeof MODES)[number];
 
@@ -27,6 +28,16 @@ export const opSchema = z.discriminatedUnion("type", [
     ts,
   }),
   z.object({ type: z.literal("goal"), weeklyGoal: z.number().int(), ts }),
+  z.object({ type: z.literal("bookmark"), page: key, section: key, on: z.boolean(), ts }),
+  z.object({
+    type: z.literal("note_save"),
+    id: z.uuid(),
+    page: key,
+    section: key,
+    body: z.string().trim().min(1).max(NOTE_MAX),
+    ts,
+  }),
+  z.object({ type: z.literal("note_delete"), id: z.uuid(), ts }),
 ]);
 
 export const batchSchema = z.object({

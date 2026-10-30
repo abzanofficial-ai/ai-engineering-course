@@ -14,6 +14,7 @@ import { CommitConfirm, LabRing, LabStep } from "@/components/chapter/practise";
 import { Flashcards } from "@/components/chapter/review";
 import { ChapterPercent, ChapterShell, ModePanel, SaveStatus } from "@/components/chapter/shell";
 import { CopyButtons } from "@/components/copy-buttons";
+import { SectionTools } from "@/components/section-tools";
 import { TermPopover, type TermDef } from "@/components/term-popover";
 import { Icon } from "@/components/icons";
 import type { Block, Section } from "@/content/types";
@@ -298,6 +299,7 @@ export default async function ChapterPage({ params }: { params: Promise<Params> 
             {labs.map((lab) => (
               <section key={lab.key} id={lab.key} style={{ display: "grid", gap: 18 }}>
                 <LabView lab={lab} />
+                <SectionTools pageKey={page.key} sectionKey={lab.key} title={lab.title} />
               </section>
             ))}
             {stuck.map((s) => (

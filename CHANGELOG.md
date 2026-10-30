@@ -4,6 +4,41 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### M4 — Find and annotate
+
+#### Added
+
+- Full-text search across every section (Pagefind index built with the content; ADR-0008): a
+  `/search` page with highlighted excerpts that deep-link into the right mode and section, plus a
+  search button in the header.
+- Glossary page (`/learn/<course>/glossary`): all 366 terms A–Z, with a filter and a letter jump
+  list. Each entry lists every chapter that defines it.
+- Definitions in the text: the importer marks the first use of each chapter's own jargon terms in
+  every prose section. Hover (desktop), tap or press Enter to see the definition, and Escape to
+  close; focus returns to the term.
+- Notes and bookmarks on every Learn section and lab (ADR-0027). They sync through the offline
+  outbox, appear on a new `/notes` page, are included in the data export and are deleted with the
+  account. A deleted note's text is erased immediately.
+- Route page links to search, the glossary, and notes and bookmarks.
+
+#### Changed
+
+- CSP `script-src` adds `'wasm-unsafe-eval'`, which allows WebAssembly compilation only, for
+  the search index (ADR-0018 update).
+- Migration 0004 adds the `bookmark` and `note` tables. It is additive only.
+
+#### Tests
+
+- Unit: term matcher and marker (first use only, whole words, never in headings, links or code),
+  plus a real-handbook check that every marked term links to that chapter's own definition, and
+  the reducer for bookmarks and notes.
+- Integration: note and bookmark last-write-wins, final deletes, validation, and isolation
+  between learners (a reused note id, a `userId` in the payload, state and export) and between
+  tenants; data removed with the account.
+- E2E: search deep link, reload and highlights; term popover by tap, keyboard and hover; glossary
+  filter; the notes flow, including that typed markup stays literal; axe in light and dark on
+  search, glossary, notes and the open popover.
+
 ### M3 — Practice depth
 
 #### Added

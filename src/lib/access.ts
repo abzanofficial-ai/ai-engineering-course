@@ -9,7 +9,7 @@ export interface CourseAccess {
 }
 
 /** Paths that always require a session. */
-const PRIVATE_PREFIXES = ["/account", "/progress", "/review", "/admin"];
+const PRIVATE_PREFIXES = ["/account", "/progress", "/review", "/notes", "/admin"];
 
 export function needsSession(pathname: string, courses: CourseAccess[]): boolean {
   if (PRIVATE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return true;

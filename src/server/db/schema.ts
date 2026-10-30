@@ -276,6 +276,49 @@ export const checkpointAttempt = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// Notes and bookmarks (ADR-0027). Both are learner text or choices, so both are personal data:
+// tenant-scoped, exported, and deleted with the account.
+
+export const bookmark = pgTable(
+  "bookmark",
+  {
+    tenantId: tenantRef(),
+    userId: userRef(),
+    course: text("course").notNull(),
+    pageKey: text("page_key").notNull(),
+    sectionKey: text("section_key").notNull(),
+    /** Kept as a flag (not a delete) so last-write-wins works across devices. */
+    on: boolean("on").notNull(),
+    clientTs: bigint("client_ts", { mode: "number" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.tenantId, t.userId, t.course, t.pageKey, t.sectionKey] })],
+);
+
+export const note = pgTable(
+  "note",
+  {
+    tenantId: tenantRef(),
+    userId: userRef(),
+    /** Chosen by the client (UUID) so a note made offline keeps its identity when it syncs. */
+    id: text("id").notNull(),
+    course: text("course").notNull(),
+    pageKey: text("page_key").notNull(),
+    sectionKey: text("section_key").notNull(),
+    body: text("body").notNull(),
+    /** Tombstone, so a delete on one device beats an older edit from another. */
+    deleted: boolean("deleted").notNull().default(false),
+    clientTs: bigint("client_ts", { mode: "number" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.userId, t.id] }),
+    index("note_page_idx").on(t.tenantId, t.userId, t.course, t.pageKey),
+  ],
+);
+
+// ---------------------------------------------------------------------------
 // Engagement (ADR-0019). Totals and streaks are computed, never stored.
 
 export const xpEvent = pgTable(
