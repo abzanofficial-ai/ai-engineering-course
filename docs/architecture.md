@@ -235,7 +235,7 @@ sequenceDiagram
     W-->>B: JSON → hydrate ticks/notes (no layout shift: reserved space)
 ```
 
-Gating: `proxy.ts` (Next 16 middleware) redirects to sign-in if a page is not public and no session cookie is present. The cookie check is cheap and keeps the HTML cacheable. The real authorisation happens on every `/api/me` call, server-side, against the session. Course content is not secret (ADR-0015); personal data is.
+Gating: `src/proxy.ts` (Next 16 proxy, rules in `src/lib/access.ts`) redirects to sign-in if a page is not public and no session cookie is present. The cookie check is cheap and keeps the HTML cacheable. The real authorisation happens on every `/api/me` call, server-side, against the session. Course content is not secret (ADR-0015); personal data is.
 
 ### 6.2 Saving progress (offline-tolerant)
 
@@ -311,3 +311,10 @@ Main cost driver at scale is email volume (sign-ins) and database compute; both 
 | production | Cloudflare Workers                                 | Neon main (London)         | Resend                    |
 
 Placeholders for Cloudflare, Resend, Google OAuth, Sentry and the domain are in `.env.example`; the app runs fully without them.
+
+## 12. Implementation notes (M2)
+
+- **Auth is created lazily** (`getAuth()`), so `next build` needs no secrets; the server refuses to start in production without `AUTH_SECRET`.
+- **Test-only switches** `EMAIL_TRANSPORT=file` and `AUTH_RATE_LIMIT=off` exist for local end-to-end runs (all sign-ins share one IP) and are rejected unless `APP_URL` is `http://localhost`.
+- **Client state** (`src/components/learner/provider.tsx`): server state + a per-learner outbox and last-known snapshot in `localStorage`, so the app opens offline for the last signed-in learner. Sign-out and deletion clear both.
+- **Chapter rendering**: all four modes are server-rendered into the static page (no duplicated HTML in the client payload); small client components toggle visibility and handle ticks, answers and ratings.

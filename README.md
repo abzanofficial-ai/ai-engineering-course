@@ -10,7 +10,7 @@ tracks progress and adds interactivity around it.
 
 ## Run it locally (about 10 minutes)
 
-**You need:** Node.js 22+, pnpm 10 (`corepack enable`), and Docker (from milestone M2, for Postgres and email).
+**You need:** Node.js 22+, pnpm 10 (`corepack enable`) and Docker.
 
 ```bash
 git clone https://github.com/abzanofficial-ai/ai-engineering-course.git
@@ -18,11 +18,15 @@ cd ai-engineering-course
 corepack enable            # provides pnpm
 pnpm install
 cp .env.example .env.local # placeholders are fine for local use
+docker compose up -d       # Postgres on :5432, Mailpit (local inbox) on http://localhost:8025
+pnpm db:migrate            # create the tables
 pnpm content:build         # parse the handbook, render diagrams (first run ~20 s)
 pnpm dev                   # http://localhost:3000
 ```
 
-From M2 onwards also run `docker compose up -d` (Postgres on 5432, Mailpit on http://localhost:8025).
+**Signing in locally:** enter any email on the sign-in page, then open http://localhost:8025 and
+click the link in Mailpit. Without Mailpit running, the link is printed in the terminal.
+To make yourself an admin, set `ADMIN_EMAILS=you@example.com` in `.env.local` before first sign-in.
 
 `pnpm content:build` renders Mermaid diagrams with headless Chromium. If it says rendering is
 unavailable, run `pnpm exec playwright install chromium` once, or use
@@ -64,9 +68,22 @@ scripts/            CLI entry points (content build/diff)
 src/content/        importer: Markdown → typed course model (pure, unit-tested)
 src/app/            Next.js routes
 src/components/     UI components
-src/lib/            shared helpers (content loader, security headers)
+src/lib/            shared helpers: progress maths, XP/streaks, dates, op schema (client + server)
+src/server/         server only: database, auth, email, rate limits, learner API logic
+drizzle/            committed SQL migrations
+tests/integration/  API, isolation and account tests against a real Postgres
 tests/fixtures/     synthetic Markdown fixtures (never real learner data)
 tests/e2e/          Playwright journeys and accessibility checks
+```
+
+### Test databases
+
+`docker compose` also creates `lms_test` (integration tests) and `lms_e2e` (end-to-end tests).
+Migrate them once:
+
+```bash
+DATABASE_URL=postgres://lms:lms_local_only@localhost:5432/lms_test pnpm db:migrate
+DATABASE_URL=postgres://lms:lms_local_only@localhost:5432/lms_e2e pnpm db:migrate
 ```
 
 ## Environment variables

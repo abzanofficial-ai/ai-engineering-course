@@ -553,6 +553,7 @@ export async function buildCourse(
     }
   }
   for (const p of seg.parts) partTitles.set(p.number, p.title);
+  const outcomes = new Map(index.rows.map((r) => [r.partNumber, r.outcome]));
 
   const sortedPages = [...pages.values()].sort((a, b) => {
     const [x, y] = [orderKey(a), orderKey(b)];
@@ -569,6 +570,8 @@ export async function buildCourse(
         key: `part-${number}`,
         title,
         introHtml: raw ? renderNodes(raw.intro, ctx) : "",
+        outcomeHtml: renderInline(outcomes.get(number) ?? [], ctx),
+        milestone: (outcomes.get(number) ?? []).some((n) => n.type === "strong"),
         pages: sortedPages.filter((p) => p.partNumber === number).map((p) => p.key),
       };
     });

@@ -7,7 +7,9 @@ services:
       POSTGRES_PASSWORD: lms_local_only
       POSTGRES_DB: lms
     ports: ["5432:5432"]
-    volumes: [db-data:/var/lib/postgresql/data]
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/01-test-databases.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lms"]
       interval: 2s

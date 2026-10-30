@@ -12,6 +12,8 @@ export interface IndexItem {
 export interface IndexRow {
   partNumber: number;
   partTitle: string;
+  /** The "You can now" cell, as inline Markdown nodes (may contain bold milestones). */
+  outcome: PhrasingContent[];
   items: IndexItem[];
 }
 
@@ -46,7 +48,7 @@ export function parseIndexTable(table: Table): { rows: IndexRow[]; warnings: str
   const rows: IndexRow[] = [];
   const warnings: string[] = [];
   for (const row of table.children.slice(1)) {
-    const [partCell, chapterCell] = row.children;
+    const [partCell, chapterCell, outcomeCell] = row.children;
     if (!partCell || !chapterCell) continue;
     const partText = toString(partCell).trim();
     const partMatch = partText.match(/^(\d+)\.\s*(.+)$/);
@@ -72,7 +74,7 @@ export function parseIndexTable(table: Table): { rows: IndexRow[]; warnings: str
         });
       else warnings.push(`Index: could not read entry "${item.text}" in part "${partText}"`);
     }
-    rows.push({ partNumber, partTitle, items });
+    rows.push({ partNumber, partTitle, items, outcome: outcomeCell?.children ?? [] });
   }
   return { rows, warnings };
 }

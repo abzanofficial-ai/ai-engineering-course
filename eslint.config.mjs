@@ -3,7 +3,8 @@ import nextTs from "eslint-config-next/typescript";
 
 // Files allowed to inject HTML: they render only importer output (raw HTML disabled), never user text. ADR-0018.
 const HTML_RENDERERS = [
-  "src/components/section-blocks.tsx",
+  "src/components/route-view.tsx",
+  "src/components/chapter/**/*.tsx",
   "src/app/learn/**/page.tsx",
   "src/app/layout.tsx",
 ];

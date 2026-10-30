@@ -68,6 +68,9 @@ export interface Part {
   key: string;
   title: string;
   introHtml: string;
+  /** "You can now…" from the Index; bold text marks a milestone. Empty if absent. */
+  outcomeHtml: string;
+  milestone: boolean;
   pages: string[];
 }
 

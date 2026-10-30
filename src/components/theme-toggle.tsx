@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { Icon } from "./icons";
 
 type Theme = "system" | "light" | "dark";
 const ORDER: Theme[] = ["system", "light", "dark"];
@@ -29,18 +30,19 @@ function apply(theme: Theme) {
   }
 }
 
-/** Cycles System → Light → Dark. The label states the current theme and the next action. */
+/** Cycles System → Light → Dark. The accessible name states the current theme and the next. */
 export function ThemeToggle() {
   const theme = useSyncExternalStore(subscribe, read, () => "system" as Theme);
   const next = ORDER[(ORDER.indexOf(theme) + 1) % ORDER.length]!;
   return (
     <button
       type="button"
-      className="min-h-11 rounded-md border border-border px-3 text-sm text-text"
+      className="icon-btn"
       aria-label={`Theme: ${LABEL[theme]}. Switch to ${LABEL[next]}`}
+      title={`Theme: ${LABEL[theme]}`}
       onClick={() => apply(next)}
     >
-      Theme: {LABEL[theme]}
+      <Icon name="contrast" />
     </button>
   );
 }

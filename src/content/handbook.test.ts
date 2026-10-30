@@ -32,6 +32,13 @@ describe("content/handbook.md", () => {
     ]);
   });
 
+  it("reads each part's 'You can now' outcome and its milestones", () => {
+    const parts = build.manifest.parts;
+    expect(parts[1]!.outcomeHtml).toBe("Build and ship working software");
+    expect(parts.filter((p) => p.milestone).map((p) => p.number)).toEqual([8, 13]);
+    expect(parts[8]!.outcomeHtml).toContain("<strong>First sellable product</strong>");
+  });
+
   it("finds every interactive element in every chapter", () => {
     const chapters = build.pages.filter((p) => p.kind === "chapter");
     for (const ch of chapters) {

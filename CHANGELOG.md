@@ -4,6 +4,39 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### M2 — Sign-in, progress and the redesigned reader
+
+#### Added
+
+- Sign-in with an emailed magic link (Resend in production, Mailpit locally) and an optional
+  Google button (shown once `GOOGLE_CLIENT_ID`/`SECRET` are set). Sessions last 30 days.
+- Rate limits: per-IP on every auth endpoint, 5 sign-in links per email per hour, 120 progress
+  batches per learner per minute.
+- Account page: name on certificates, download my data (JSON), sign out, delete my account
+  (type your email to confirm; every personal row is removed).
+- Postgres schema and migrations (Drizzle): progress, lab steps and commits, drill answers,
+  flashcard reviews (Leitner boxes), last position, XP events, activity days, settings.
+- Progress API: one idempotent batch endpoint. Every key is validated against the course, XP is
+  awarded once per item on the server, offline replays resolve last-write-wins.
+- Redesigned reader (design-system §5): route map home with part outcomes and milestones; chapters
+  in Learn / Practise / Decide / Review modes; lab checklist; answer-before-reveal drills;
+  flashcards; deep links (#section) open the right mode; "Continue where you left off".
+- XP, streak with freezes, weekly goal and progress percentages; "Your progress" page.
+- Installable PWA: manifest, icons, service worker (visited chapters work offline; personal data
+  never cached), install prompt from the second visit (iPhone gets Add to Home Screen steps).
+- Offline outbox: actions show instantly, queue on the device per learner, sync when online.
+- Public pages (Start here, Chapter 1) readable without an account; other chapters redirect to
+  sign-in and come back afterwards.
+
+#### Tests
+
+- 75 unit tests (content, XP/streak/goal maths, spaced repetition, access rules) and 20
+  integration tests against Postgres, including cross-learner isolation for every personal route
+  and a check that fails if a new route lacks an isolation case.
+- 35 Playwright tests on desktop and mobile: signed-out reading and gating, the full learner
+  journey with XP, account export and deletion, offline progress syncing, and axe WCAG 2.2 AA on
+  every screen in light and dark.
+
 ### Design revision (after preview feedback)
 
 #### Changed

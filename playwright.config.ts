@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const port = Number(process.env.E2E_PORT ?? 3100);
+export const MAIL_FILE = ".cache/e2e-mail.jsonl";
 
 export default defineConfig({
   testDir: "tests/e2e",
@@ -18,8 +19,17 @@ export default defineConfig({
   ],
   webServer: {
     command: `pnpm exec next start -p ${port}`,
-    url: `http://localhost:${port}/learn/ai-engineering-handbook`,
-    reuseExistingServer: !process.env.CI,
+    url: `http://localhost:${port}/api/health`,
+    reuseExistingServer: false,
     timeout: 60_000,
+    env: {
+      APP_URL: `http://localhost:${port}`,
+      DATABASE_URL:
+        process.env.E2E_DATABASE_URL ?? "postgres://lms:lms_local_only@localhost:5432/lms_e2e",
+      AUTH_SECRET: "e2e-secret-e2e-secret-e2e-secret-e2e-secret",
+      EMAIL_TRANSPORT: "file",
+      AUTH_RATE_LIMIT: "off",
+      MAIL_FILE,
+    },
   },
 });

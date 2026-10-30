@@ -65,7 +65,7 @@ const registry =
   courses
     .map(
       (c, i) =>
-        `  ${JSON.stringify(c.slug)}: { manifest: m${i} as CourseManifest, glossary: g${i} as GlossaryEntry[], cards: c${i} as Card[] },`,
+        `  ${JSON.stringify(c.slug)}: { manifest: m${i} as unknown as CourseManifest, glossary: g${i} as unknown as GlossaryEntry[], cards: c${i} as unknown as Card[] },`,
     )
     .join("\n") +
   `\n};\n`;
