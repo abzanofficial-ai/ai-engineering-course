@@ -290,7 +290,18 @@ export default async function ChapterPage({ params }: { params: Promise<Params> 
                 )}
               </LearnCard>
             ))}
-            <LearnPager hasPractise={modes.includes("practise")} />
+            <LearnPager
+              hasPractise={modes.includes("practise")}
+              courseHref={`/learn/${course}`}
+              next={
+                next
+                  ? {
+                      href: pageHref(course, next),
+                      title: next.label ? `${next.label}: ${next.title}` : next.title,
+                    }
+                  : undefined
+              }
+            />
           </ModePanel>
         )}
 

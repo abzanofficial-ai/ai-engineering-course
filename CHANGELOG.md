@@ -4,6 +4,13 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Fixed
+
+- "Mark as read" on the last section of a chapter without a lab saved the section but showed
+  nothing, so it looked broken (the preview also jumped back to the top). It now shows a
+  "Chapter complete" card: how many sections are read, a link to the next chapter, a way back to
+  any unread section, and a link back to the course. Regression test: `tests/e2e/chapter-end.spec.ts`.
+
 ### Learner dashboard
 
 #### Added

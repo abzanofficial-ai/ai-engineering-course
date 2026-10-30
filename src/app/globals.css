@@ -2419,3 +2419,45 @@ body {
 .crumbs a {
   color: var(--accent);
 }
+
+/* End of a chapter without a lab: confirm it and offer what's next. */
+.chapter-done {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 20px;
+  border-radius: var(--radius);
+  background: var(--raised);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+.chapter-done-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--practise-bg);
+  color: var(--practise);
+}
+.chapter-done h3 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+.chapter-done h3:focus {
+  outline: none;
+}
+.chapter-done p {
+  margin: 0;
+  color: var(--muted);
+}
+.chapter-done-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+.chapter-done-actions .btn {
+  text-decoration: none;
+  gap: 8px;
+}
