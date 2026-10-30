@@ -43,6 +43,13 @@
       "when": 1793395702157,
       "tag": "0005_certificates",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793399603920,
+      "tag": "0006_commercial_model",
+      "breakpoints": true
     }
   ]
 }

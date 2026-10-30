@@ -6,7 +6,7 @@ import { clearTenantCaches } from "@/server/repo/tenant";
 // Every test starts from an empty database (migrations are applied once by `pnpm db:migrate`).
 beforeEach(async () => {
   await db().execute(
-    sql`truncate table "user", rate_limit, rate_limit_bucket, verification restart identity cascade`,
+    sql`truncate table "user", rate_limit, rate_limit_bucket, verification, entitlement, seat_pack, tenant_licence restart identity cascade`,
   );
   // Tenants other than the default exist only inside a test.
   await db().execute(sql`delete from tenant_course where tenant_id <> 'tnt_default'`);

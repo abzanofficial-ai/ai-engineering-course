@@ -56,3 +56,15 @@ DROP TABLE "certificate";
 DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrations" ORDER BY created_at DESC LIMIT 1);
 COMMIT;
 ```
+
+## Rolling back migration 0006 (commercial model)
+
+Additive only. Deploy the previous application version first, then (after exporting the tables
+if grants, seat packs or licences must be kept):
+
+```sql
+BEGIN;
+DROP TABLE "entitlement"; DROP TABLE "seat_pack"; DROP TABLE "tenant_licence";
+DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrations" ORDER BY created_at DESC LIMIT 1);
+COMMIT;
+```

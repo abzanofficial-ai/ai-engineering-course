@@ -338,6 +338,75 @@ export const certificate = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// Commercial model (ADR-0030). Entitlements are never deleted when revoked (audit trail).
+
+/** A centre's white-label licence: base fee including N active learners, then per extra one. */
+export const tenantLicence = pgTable(
+  "tenant_licence",
+  {
+    tenantId: text("tenant_id")
+      .primaryKey()
+      .references(() => tenant.id),
+    plan: text("plan").notNull(),
+    basePence: integer("base_pence").notNull(),
+    includedLearners: integer("included_learners").notNull(),
+    extraLearnerPence: integer("extra_learner_pence").notNull(),
+    status: text("status").notNull().default("active"),
+    startsAt: timestamp("starts_at", { withTimezone: true }).defaultNow().notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [check("tenant_licence_status_check", sql`${t.status} in ('active', 'suspended')`)],
+);
+
+/** N learner places bought by a centre; students redeem them with one join code. */
+export const seatPack = pgTable(
+  "seat_pack",
+  {
+    id: text("id").primaryKey(),
+    tenantId: tenantRef(),
+    course: text("course").notNull(),
+    orgName: text("org_name").notNull(),
+    seats: integer("seats").notNull(),
+    accessMonths: integer("access_months").notNull(),
+    /** sha256 of the normalised code; the code itself is shown once and never stored. */
+    codeHash: text("code_hash").notNull().unique(),
+    codeHint: text("code_hint").notNull(),
+    redeemBy: timestamp("redeem_by", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [check("seat_pack_seats_check", sql`${t.seats} > 0`)],
+);
+
+/** Access to a course through a purchase, a seat or an admin grant. */
+export const entitlement = pgTable(
+  "entitlement",
+  {
+    id: text("id").primaryKey(),
+    tenantId: tenantRef(),
+    userId: userRef(),
+    course: text("course").notNull(),
+    source: text("source").notNull(),
+    plan: text("plan"),
+    seatPackId: text("seat_pack_id").references(() => seatPack.id),
+    /** The merchant of record's subscription or order id (Phase 4); idempotency key. */
+    externalRef: text("external_ref").unique(),
+    note: text("note"),
+    startsAt: timestamp("starts_at", { withTimezone: true }).defaultNow().notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    check("entitlement_source_check", sql`${t.source} in ('direct', 'seat', 'admin')`),
+    index("entitlement_lookup_idx").on(t.tenantId, t.userId, t.course),
+    // One seat per learner per pack.
+    uniqueIndex("entitlement_seat_once").on(t.seatPackId, t.userId),
+  ],
+);
+
+// ---------------------------------------------------------------------------
 // Engagement (ADR-0019). Totals and streaks are computed, never stored.
 
 export const xpEvent = pgTable(

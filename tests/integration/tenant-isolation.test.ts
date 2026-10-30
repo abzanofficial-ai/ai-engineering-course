@@ -10,6 +10,7 @@ import { db } from "@/server/db/client";
 import * as accountRepo from "@/server/repo/account";
 import * as certificateRepo from "@/server/repo/certificate";
 import * as checkpointRepo from "@/server/repo/checkpoint";
+import * as commerceRepo from "@/server/repo/commerce";
 import * as progressRepo from "@/server/repo/progress";
 import * as stateRepo from "@/server/repo/state";
 import * as tenantRepo from "@/server/repo/tenant";
@@ -54,6 +55,22 @@ describe("tenant isolation", () => {
       "claimCertificate",
       "listCertificates",
       "deleteCertificate",
+      "loadAccess",
+      "myAccess",
+      "redeemJoinCode",
+    ];
+    // Platform administration: name their tenant explicitly; callers hold platform:* (ADR-0030).
+    const PLATFORM = [
+      "userIdByEmail",
+      "grantEntitlement",
+      "revokeEntitlement",
+      "listEntitlements",
+      "createSeatPack",
+      "regenerateSeatCode",
+      "revokeSeatPack",
+      "listSeatPacks",
+      "setTenantLicence",
+      "licenceUsage",
     ];
     // Public by design: looks up one certificate by its unguessable id (ADR-0029).
     const PUBLIC = ["verifyCertificate"];
@@ -70,17 +87,21 @@ describe("tenant isolation", () => {
       "clearTenantCaches",
       "DEFAULT_TENANT_ID",
       "newCertificateId",
+      "pageAccess",
     ];
     const exported = [
       accountRepo,
       certificateRepo,
       checkpointRepo,
+      commerceRepo,
       progressRepo,
       stateRepo,
       tenantRepo,
     ].flatMap((m) => Object.keys(m));
     // A new repository function must be added to one of the lists (and, if tenant-scoped, tested below).
-    expect(exported.sort()).toEqual([...TENANT_SCOPED, ...PUBLIC, ...IDENTITY, ...INFRA].sort());
+    expect(exported.sort()).toEqual(
+      [...TENANT_SCOPED, ...PUBLIC, ...PLATFORM, ...IDENTITY, ...INFRA].sort(),
+    );
   });
 
   it("the same learner in two tenants has fully separate progress", async () => {

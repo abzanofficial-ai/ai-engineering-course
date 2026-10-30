@@ -18,6 +18,7 @@ const PERSONAL_TABLES = {
   bookmarks: t.bookmark,
   notes: t.note,
   certificates: t.certificate,
+  entitlements: t.entitlement,
   activityDays: t.activityDay,
   settings: t.userSettings,
 } as const;
