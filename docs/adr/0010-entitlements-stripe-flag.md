@@ -1,6 +1,6 @@
 # ADR-0010: Entitlements model now; Stripe behind a feature flag
 
-- Status: accepted · Date: 2026-10-29 · Decider: Chief Architect
+- Status: accepted; Stripe integration superseded by ADR-0026 (merchant of record); product kinds extended with `subscription` · Date: 2026-10-29 · Decider: Chief Architect
 
 ## Context
 

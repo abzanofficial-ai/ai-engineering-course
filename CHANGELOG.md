@@ -4,6 +4,31 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Future-proofing for white-label, LMS integration and billing (owner request)
+
+#### Added
+
+- Tenancy-ready data model (ADR-0023): `tenant`, `membership` (roles `tenant_admin`, `tutor`,
+  `learner`) and `tenant_course` tables; default tenant `tnt_default`; `tenant_id` first in the
+  key of every tenant-owned table; `user.platform_role` (`platform_owner`) replaces `user.role`.
+  Migrations 0001–0002 keep every existing row (proven by a migration test).
+- One permission matrix (`src/server/authz.ts`), one tenant resolver that never reads user
+  input, `requireContext()` for routes, and tenant-scoped repositories in `src/server/repo/`.
+  A lint rule forbids database access anywhere else.
+- Branding and access settings from tenant configuration (ADR-0024):
+  `content/tenants/default.json`, overridable per tenant; no brand literals in `src/` (tested).
+- Tenants can switch off courses or modules; the API refuses progress for them.
+- Tenant isolation tests: same learner in two tenants, cross-tenant learners, tenant-scoped
+  export, tenant claims in requests ignored, every repository function classified.
+- Docs: `docs/roadmap.md` (phases 1–4), ADR-0023 tenancy, ADR-0024 branding, ADR-0025 LTI
+  deferred to Phase 3, ADR-0026 merchant of record (supersedes ADR-0010's Stripe flag);
+  architecture §13, test strategy §4b, rollback steps in the runbook.
+
+#### Changed
+
+- Public pages are a tenant setting rather than a course setting.
+- Data export now covers the current tenant (and says which).
+
 ### M2 — Sign-in, progress and the redesigned reader
 
 #### Added

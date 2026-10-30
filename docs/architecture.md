@@ -318,3 +318,44 @@ Placeholders for Cloudflare, Resend, Google OAuth, Sentry and the domain are in 
 - **Test-only switches** `EMAIL_TRANSPORT=file` and `AUTH_RATE_LIMIT=off` exist for local end-to-end runs (all sign-ins share one IP) and are rejected unless `APP_URL` is `http://localhost`.
 - **Client state** (`src/components/learner/provider.tsx`): server state + a per-learner outbox and last-known snapshot in `localStorage`, so the app opens offline for the last signed-in learner. Sign-out and deletion clear both.
 - **Chapter rendering**: all four modes are server-rendered into the static page (no duplicated HTML in the client payload); small client components toggle visibility and handle ticks, answers and ratings.
+
+## 13. Tenancy, roles and branding (ADR-0023, ADR-0024)
+
+One tenant exists today; the model is ready for many (Phase 2).
+
+```mermaid
+erDiagram
+    tenant ||--o{ membership : has
+    user ||--o{ membership : "belongs via"
+    tenant ||--o{ tenant_course : offers
+    tenant ||--o{ section_progress : owns
+    user ||--o{ section_progress : ""
+    tenant {
+      text id PK "tnt_default"
+      text slug UK
+      jsonb config "branding + access overrides"
+    }
+    membership {
+      text tenant_id PK
+      text user_id PK
+      text role "tenant_admin | tutor | learner"
+      text status "active | deactivated"
+    }
+    tenant_course {
+      text tenant_id PK
+      text course PK
+      bool enabled
+      jsonb disabled_modules "page keys or part:N"
+    }
+    user {
+      text id PK
+      text email UK "global sign-in identity"
+      text platform_role "platform_owner | null"
+    }
+```
+
+- **Identity vs tenancy:** `user`/`session`/`account` are the global sign-in identity. All learning data is tenant-owned: its primary key starts `(tenant_id, user_id, …)`.
+- **Request flow:** `requireContext(req, action)` → `resolveTenant(req)` (default tenant today; host-based in Phase 2; never from user input) → session user → membership (created as learner on first use) → `can(actor, action)` → `ctx = { tenantId, userId }` → repositories in `src/server/repo/` apply both scopes. Nothing else may import the database client (lint rule).
+- **Roles:** tenant roles on membership; platform role on user; permission matrix in `src/server/authz.ts`.
+- **Content ownership:** course content is platform-owned (Markdown → build output), never copied per tenant. `tenant_course` enables courses and disables modules; the progress API refuses disabled ones.
+- **Branding:** `content/tenants/default.json` + `tenant.config` overrides → `brandingFor()`; static pages use the defaults at build time, emails/manifest/dynamic pages the request's tenant; colours as CSS variables.

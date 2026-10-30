@@ -21,6 +21,7 @@ import {
   xpEvent,
 } from "../db/schema";
 import { courseIndex, type CourseIndex } from "../course-index";
+import { courseAccess } from "./tenant";
 
 /** Accept the client's date only within ±1 day of the server's UTC date (ADR-0019). */
 export function clampDay(day: string, now = new Date()): string {
@@ -49,6 +50,16 @@ async function award(
   return rows.length ? points : 0;
 }
 
+/** True when the tenant switched off this page or its part (ADR-0023, content ownership). */
+export function isDisabled(disabledModules: string[], pageKey: string, idx: CourseIndex): boolean {
+  if (!disabledModules.length) return false;
+  const part = idx.manifest.pages.find((p) => p.key === pageKey)?.partNumber;
+  return (
+    disabledModules.includes(pageKey) ||
+    (part !== undefined && disabledModules.includes(`part:${part}`))
+  );
+}
+
 function validate(op: Op, idx: CourseIndex): string | null {
   switch (op.type) {
     case "section_read":
@@ -73,13 +84,17 @@ export async function applyOps(ctx: Ctx, batch: Batch, now = new Date()): Promis
   const { tenantId, userId } = ctx;
   const idx = courseIndex(batch.course);
   if (!idx) return batch.ops.map(() => ({ ok: false, error: "unknown course" }));
+  const access = await courseAccess(tenantId, batch.course);
+  if (!access.enabled) return batch.ops.map(() => ({ ok: false, error: "course not available" }));
+  const disabled = (page: string) => isDisabled(access.disabledModules, page, idx);
   const course = batch.course;
   const day = clampDay(batch.day, now);
 
   return db().transaction(async (tx) => {
     const results: OpResult[] = [];
     for (const op of batch.ops) {
-      const error = validate(op, idx);
+      const page = "page" in op ? op.page : op.type === "card" ? idx.cards.get(op.card) : undefined;
+      const error = validate(op, idx) ?? (page && disabled(page) ? "module not available" : null);
       if (error) {
         results.push({ ok: false, error });
         continue;

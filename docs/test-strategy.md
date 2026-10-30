@@ -49,6 +49,20 @@ For **every** personal resource (section progress, last position, lab steps, lab
 
 The suite enumerates API routes from the filesystem and **fails if a new personal route has no isolation case**, so coverage cannot silently drift.
 
+## 4b. Tenant isolation (ADR-0023)
+
+Only one tenant exists in production, but every repository function is tested against a second tenant created inside the test:
+
+1. The same learner in two tenants has fully separate progress, answers, XP and streaks.
+2. A learner in tenant B cannot see tenant A's learner's data, even with identical content keys.
+3. Data export covers only the current tenant.
+4. Requests always run in the resolved tenant: a tenant named in the query, body, headers or cookies is ignored.
+5. A disabled course is not found; a disabled module refuses progress.
+6. Every export of `src/server/repo/*` must be classified as tenant-scoped, identity-level or infrastructure — a new function fails the suite until it is classified (and, if tenant-scoped, tested).
+7. A migration test builds a pre-tenancy database, applies the migrations, and proves every row is kept and assigned to the default tenant.
+
+Phase 2 extends these to host-based resolution (tenant A's domain can never serve tenant B's data) and to tutor/tenant-admin roles.
+
 ## 5. End-to-end journeys (Playwright)
 
 1. Sign up by magic link (email captured from Mailpit/in-memory), set name, sign out/in.

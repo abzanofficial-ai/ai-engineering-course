@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
-import { listCourses } from "@/lib/content";
+import { defaultBranding } from "@/lib/branding";
 
-// One course today; the platform supports several (ADR-0017). With one, go straight to it.
+// The tenant's default course (ADR-0024); the platform can host several (ADR-0017).
 export default function Home() {
-  const courses = listCourses();
-  redirect(`/learn/${courses[0]!.slug}`);
+  redirect(`/learn/${defaultBranding.defaultCourse}`);
 }
