@@ -78,6 +78,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <footer className="mt-16 border-t border-line py-8 text-sm text-muted">
             <div className="wrap flex flex-wrap gap-x-6 gap-y-2" style={{ maxWidth: "72rem" }}>
               <span>{brand.footer}</span>
+              <Link href="/plans">Plans</Link>
               <Link href="/account">Account</Link>
               <a href={`mailto:${brand.supportEmail}`}>Contact support</a>
             </div>

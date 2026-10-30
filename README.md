@@ -90,3 +90,9 @@ DATABASE_URL=postgres://lms:lms_local_only@localhost:5432/lms_e2e pnpm db:migrat
 
 See [`.env.example`](.env.example). Every external service (Resend, Google OAuth, Sentry,
 Cloudflare, Stripe) is a placeholder: the app runs locally without any of them.
+
+## Admin
+
+Platform owners are the emails in `ADMIN_EMAILS` (comma-separated, set before they first sign
+in). They see `/admin/commerce`: seat packs and join codes, manual access, and centre licences
+with monthly usage (ADR-0030). Prices and offers live in `content/plans.json`.

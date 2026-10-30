@@ -30,6 +30,7 @@ export default defineConfig({
       EMAIL_TRANSPORT: "file",
       AUTH_RATE_LIMIT: "off",
       MAIL_FILE,
+      ADMIN_EMAILS: "owner@example.test",
     },
   },
 });

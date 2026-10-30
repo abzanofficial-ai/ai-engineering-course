@@ -4,6 +4,58 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### M5b — Commercial model: direct learners, centre licences and seat packs
+
+#### Added
+
+- ADR-0030 and `content/plans.json`: three offers, priced in one editable file (placeholder
+  prices until tested with centres):
+  - **Direct:** monthly, annual and lifetime plans for individual learners.
+  - **Centre licence:** a monthly fee that includes a number of active learners, then a fee
+    per extra active learner.
+  - **Seat packs:** a centre buys places and gives its students one join code. This replaces
+    the 30% revenue share.
+- One access rule everywhere: public → signed in → launch mode → centre licence → purchase,
+  seat or grant → free tier → plans. Launch mode stays on, so every signed-in learner still
+  has the full course.
+- `/plans`: the offers, prices and how centres get in touch. A footer link points to it.
+- `/join`: learners redeem a centre's join code. Codes are about 59 bits, stored only as a
+  hash, rate-limited, and can be revoked or regenerated; a pack can never be over-redeemed.
+- Account page: "Your access" says how the learner has access and until when.
+- `/admin/commerce`, for platform owners only (everyone else gets a 404):
+  - create seat packs (the code is shown once);
+  - grant and revoke access by email;
+  - set a centre's licence and see a month's active learners and the invoice amount.
+- Server enforcement: progress and checkpoint writes refuse paid pages without access.
+- For when launch mode is turned off, paid pages need a 15-minute signed access pass bound to
+  the session. `/access` checks the database and issues it, or sends the learner to `/plans`.
+- Migration 0006 adds `entitlement`, `seat_pack` and `tenant_licence`. It is additive only.
+
+#### Fixed (found by the new tests before release)
+
+- The seat-pack list counted 0 used seats, because of an ambiguous column in a subquery.
+- The admin access list failed, because a date was passed to the database driver unconverted.
+
+#### Tests
+
+- Unit: prices, invoices, seat tiers, join codes, the access rule, free-tier patterns, paid-page
+  detection and the access pass (forgery, expiry, session binding).
+- Integration:
+  - every route to access, with launch mode off;
+  - six learners racing for one last seat, with exactly one winner;
+  - expiry, revocation, regeneration and tenant separation;
+  - export and account deletion;
+  - licence usage and invoices;
+  - the APIs with launch mode off, the `/access` pass and open-redirect refusal;
+  - every admin route refuses learners (403) and signed-out requests (401);
+  - the owner's full flow.
+- E2E:
+  - the plans page;
+  - join errors;
+  - Your access;
+  - the owner creates a pack and a learner joins with the code in another browser, with axe;
+  - learners get a 404 for admin.
+
 ### M5a — Verifiable certificates
 
 #### Added

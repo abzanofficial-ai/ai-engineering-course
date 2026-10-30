@@ -2700,3 +2700,72 @@ body {
 .chapter-done .btn {
   text-decoration: none;
 }
+
+/* ---------------------------------------------------------------- Admin (ADR-0030) */
+.admin {
+  max-width: 72rem;
+}
+.admin-grid {
+  display: grid;
+  gap: 18px;
+}
+.admin-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.admin-bar label,
+.admin-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.admin .panel {
+  display: grid;
+  gap: 12px;
+}
+.admin .panel h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.admin-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+.admin table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.admin th,
+.admin td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.row-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.code-reveal {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--learn-bg);
+}
+.code-reveal p {
+  margin: 0;
+}
+.code-big {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}

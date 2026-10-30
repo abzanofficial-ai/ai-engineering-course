@@ -71,6 +71,7 @@ describe("tenant isolation", () => {
       "listSeatPacks",
       "setTenantLicence",
       "licenceUsage",
+      "listTenants",
     ];
     // Public by design: looks up one certificate by its unguessable id (ADR-0029).
     const PUBLIC = ["verifyCertificate"];

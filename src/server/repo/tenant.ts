@@ -72,3 +72,16 @@ export function clearTenantCaches(): void {
   cache.clear();
   courseCache.clear();
 }
+
+/** Platform administration: every tenant, for the admin screens (callers hold platform:*). */
+export async function listTenants(): Promise<
+  { id: string; slug: string; name: string; status: string }[]
+> {
+  const rows = await db().select().from(tenant).orderBy(tenant.createdAt);
+  return rows.map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    status: r.status,
+    name: String((r.config as Record<string, unknown>)?.name ?? r.slug),
+  }));
+}

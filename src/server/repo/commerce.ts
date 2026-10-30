@@ -257,7 +257,7 @@ export async function listEntitlements(tenantId: string, now = new Date()) {
       orgName: seatPack.orgName,
       startsAt: entitlement.startsAt,
       endsAt: entitlement.endsAt,
-      active: sql<boolean>`${entitlement.revokedAt} is null and (${entitlement.endsAt} is null or ${entitlement.endsAt} > ${now})`,
+      active: sql<boolean>`${entitlement.revokedAt} is null and (${entitlement.endsAt} is null or ${entitlement.endsAt} > ${now.toISOString()}::timestamptz)`,
     })
     .from(entitlement)
     .innerJoin(user, eq(user.id, entitlement.userId))
