@@ -6,6 +6,7 @@ import { toHast } from "mdast-util-to-hast";
 import { toString } from "mdast-util-to-string";
 import { bundledLanguages, createHighlighter, type Highlighter } from "shiki";
 import { visit } from "unist-util-visit";
+import type { TermMatcher } from "./glossary";
 import { hash, slugify } from "./keys";
 import { describeMermaid } from "./mermaid-text";
 import type { Diagram, DiagramRenders } from "./types";
@@ -142,6 +143,57 @@ export function markPlaceholders(nodes: RootContent[]): void {
     (parent.children as PhrasingContent[]).splice(index, 1, ...pieces);
     return index + pieces.length;
   });
+}
+
+/** Where a term reference would be wrong: headings, links, code and already-marked text. */
+const NO_TERMS = new Set([
+  "heading",
+  "link",
+  "linkReference",
+  "emphasis",
+  "code",
+  "inlineCode",
+  "table",
+]);
+
+/**
+ * Wraps the first use of each of the chapter's own terms in a section with a button that opens
+ * its definition (`seen` carries the ids already marked in this section).
+ */
+export function markTerms(nodes: RootContent[], matcher: TermMatcher, seen: Set<string>): void {
+  const walk = (children: RootContent[]) => {
+    for (let i = 0; i < children.length; i++) {
+      const node = children[i]!;
+      if (NO_TERMS.has(node.type)) continue;
+      if (node.type !== "text") {
+        if ("children" in node) walk(node.children as RootContent[]);
+        continue;
+      }
+      const pieces: PhrasingContent[] = [];
+      let last = 0;
+      for (const m of node.value.matchAll(matcher.regex)) {
+        const id = matcher.idOf(m[0]);
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        const at = m.index ?? 0;
+        if (at > last) pieces.push({ type: "text", value: node.value.slice(last, at) });
+        pieces.push({
+          type: "emphasis",
+          data: {
+            hName: "button",
+            hProperties: { type: "button", className: ["term-ref"], dataTerm: id },
+          },
+          children: [{ type: "text", value: m[0] }],
+        } as PhrasingContent);
+        last = at + m[0].length;
+      }
+      if (!pieces.length) continue;
+      if (last < node.value.length) pieces.push({ type: "text", value: node.value.slice(last) });
+      children.splice(i, 1, ...(pieces as RootContent[]));
+      i += pieces.length - 1;
+    }
+  };
+  walk(nodes);
 }
 
 function transformHast(tree: HastRoot): void {

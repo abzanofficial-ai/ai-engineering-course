@@ -14,6 +14,7 @@ import { CommitConfirm, LabRing, LabStep } from "@/components/chapter/practise";
 import { Flashcards } from "@/components/chapter/review";
 import { ChapterPercent, ChapterShell, ModePanel, SaveStatus } from "@/components/chapter/shell";
 import { CopyButtons } from "@/components/copy-buttons";
+import { TermPopover, type TermDef } from "@/components/term-popover";
 import { Icon } from "@/components/icons";
 import type { Block, Section } from "@/content/types";
 import {
@@ -171,6 +172,10 @@ export default async function ChapterPage({ params }: { params: Promise<Params> 
       .filter((d) => d.pageKey === page.key)
       .map((d) => ({ term: g.term, html: d.html })),
   );
+  const termDefs: TermDef[] = getGlossary(course).flatMap((g) => {
+    const own = g.definitions.find((d) => d.pageKey === page.key);
+    return own ? [{ id: g.term.toLowerCase(), term: g.term, slug: g.slug, html: own.html }] : [];
+  });
   const cards = interview.flatMap((s) =>
     s.blocks
       .filter((b): b is Extract<Block, { kind: "card" }> => b.kind === "card")
@@ -404,6 +409,7 @@ export default async function ChapterPage({ params }: { params: Promise<Params> 
         </nav>
       )}
       <CopyButtons />
+      <TermPopover course={course} terms={termDefs} />
     </main>
   );
 }

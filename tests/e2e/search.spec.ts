@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 test("search finds a lab and deep-links into Practise mode", async ({ page }) => {
   await page.goto("/learn/ai-engineering-handbook");
-  await page.getByRole("link", { name: "Search the course" }).click();
+  await page.getByRole("banner").getByRole("link", { name: "Search the course" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Search");
   await page.getByLabel("Search the whole course").fill("CSV-processing skeleton");
   const hit = page.getByRole("link", { name: /Practice lab: build the CSV-processing skeleton/ });

@@ -131,6 +131,14 @@ export function RouteView({ data }: { data: RouteData }) {
             keep a streak.
           </p>
         ) : null}
+        <p className="small route-tools">
+          <Link href="/search">
+            <Icon name="search" /> Search the course
+          </Link>
+          <Link href={`/learn/${data.course}/glossary`}>
+            <Icon name="tag" /> Glossary
+          </Link>
+        </p>
       </section>
 
       <h2 className="route-h">Your route</h2>

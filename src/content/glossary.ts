@@ -50,3 +50,29 @@ export function termForms(term: string): string[] {
 export function termDisplay(term: string): string {
   return term.replace(/`/g, "").replace(/\s+/g, " ").trim();
 }
+
+/** Lower-cased display name: the id the reader uses to find a term's glossary entry. */
+export const termId = (term: string) => termDisplay(term).toLowerCase();
+
+export interface TermMatcher {
+  regex: RegExp;
+  /** The term id a matched form belongs to. */
+  idOf: (match: string) => string | undefined;
+}
+
+/**
+ * Builds one case-insensitive matcher for a chapter's own jargon terms. Longer forms win
+ * ("false positive" before "positive"), and a match never starts or ends inside a word.
+ */
+export function termMatcher(terms: string[]): TermMatcher | null {
+  const byForm = new Map<string, string>();
+  for (const t of terms)
+    for (const f of termForms(t)) if (f.length >= 3 && !byForm.has(f)) byForm.set(f, termId(t));
+  if (byForm.size === 0) return null;
+  const forms = [...byForm.keys()].sort((a, b) => b.length - a.length || a.localeCompare(b));
+  const escaped = forms.map((f) => f.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return {
+    regex: new RegExp(`(?<![\\p{L}\\p{N}_-])(?:${escaped.join("|")})(?![\\p{L}\\p{N}_-])`, "giu"),
+    idOf: (m) => byForm.get(m.toLowerCase()),
+  };
+}

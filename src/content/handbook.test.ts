@@ -15,6 +15,26 @@ beforeAll(async () => {
 }, 60_000);
 
 describe("content/handbook.md", () => {
+  it("links terms in the text only to the chapter's own glossary definitions", () => {
+    let marks = 0;
+    for (const page of build.pages) {
+      const own = new Set(
+        build.glossary
+          .filter((g) => g.definitions.some((d) => d.pageKey === page.key))
+          .map((g) => g.term.toLowerCase()),
+      );
+      for (const section of page.content) {
+        const ids = section.blocks.flatMap((b) =>
+          "html" in b ? [...b.html.matchAll(/data-term="([^"]+)"/g)].map((m) => m[1]!) : [],
+        );
+        expect(ids.filter((id) => !own.has(id.replace(/&#x26;/g, "&")))).toEqual([]);
+        expect(new Set(ids).size).toBe(ids.length); // first use only
+        marks += ids.length;
+      }
+    }
+    expect(marks).toBeGreaterThan(300);
+  });
+
   it("parses without warnings", () => {
     expect(build.manifest.warnings).toEqual([]);
   });

@@ -3,13 +3,14 @@ import { fromMarkdown } from "mdast-util-from-markdown";
 import { gfmFromMarkdown } from "mdast-util-gfm";
 import { toString } from "mdast-util-to-string";
 import { gfm } from "micromark-extension-gfm";
-import { termDisplay, termForms } from "./glossary";
+import { termDisplay, termForms, termMatcher, type TermMatcher } from "./glossary";
 import { parseIndexTable, type IndexRow } from "./index-table";
 import { appendixKey, cardKey, chapterKey, hash, slugify, startKey, stepKey } from "./keys";
 import {
   collectMermaid,
   createRenderContext,
   markPlaceholders,
+  markTerms,
   prepareHeadings,
   renderInline,
   renderNodes,
@@ -288,6 +289,7 @@ function buildSection(
   pageKey: string,
   ctx: RenderContext,
   used: Set<string>,
+  matcher: TermMatcher | null = null,
 ): BuiltSection {
   const text = plainText(nodes);
   const cards: Card[] = [];
@@ -352,6 +354,7 @@ function buildSection(
       }
     }
     prepareHeadings(nodes, key, used);
+    if (matcher && type !== "jargon") markTerms(nodes, matcher, new Set());
     blocks.push({ kind: "html", html: renderNodes(nodes, ctx) });
   }
 
@@ -414,6 +417,17 @@ function buildPage(raw: RawPage, courseSlug: string, ctx: RenderContext): BuiltP
     else groups[groups.length - 1]!.nodes.push(n);
   }
 
+  // The chapter's own jargon terms, so prose can link their first use in each section.
+  const jargon = groups.find((g) => g.title !== null && classifySection(g.title) === "jargon");
+  const ownTerms: string[] = [];
+  for (const n of jargon?.nodes ?? [])
+    if (n.type === "table")
+      for (const row of n.children.slice(1)) {
+        const term = row.children[0] ? toString(row.children[0]).trim() : "";
+        if (term && row.children[1]) ownTerms.push(term);
+      }
+  const matcher = termMatcher(ownTerms);
+
   const used = new Set<string>();
   const typeCount = new Map<string, number>();
   const sections: Section[] = [];
@@ -438,7 +452,7 @@ function buildPage(raw: RawPage, courseSlug: string, ctx: RenderContext): BuiltP
     for (let i = 2; used.has(unique); i++) unique = `${sKey}-${i}`;
     used.add(unique);
 
-    const built = buildSection(type, unique, title, g.nodes, key, ctx, used);
+    const built = buildSection(type, unique, title, g.nodes, key, ctx, used, matcher);
     sections.push(built.section);
     metas.push(built.meta);
     cards.push(...built.cards);
