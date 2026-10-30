@@ -16,4 +16,4 @@ Three reminder types, **all off by default** (UK GDPR / PECR: explicit opt-in fo
 
 ## Consequences
 
-Cost stays inside Resend's free tier at launch (weekly email to opted-in learners only); the cost model notes the Pro tier ($20/month) once volume exceeds 3,000 emails/month. Push notifications wait for mobile apps (out of scope).
+Cost stays inside Resend's free tier at launch (weekly email to opted-in learners only); the cost model notes the Pro tier ($20/month) once volume exceeds 3,000 emails/month. Push notifications: see ADR-0022 (web push via the installable PWA), sent alongside these emails.

@@ -17,6 +17,15 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 - ADR-0019 XP, streaks, weekly goal and progress percentages (M2).
 - ADR-0020 opt-in reminder emails (M5).
 - ADR-0021 self-assessed part checkpoints, with a scored question bank as a later option (M3).
+- ADR-0022 installable PWA with offline chapters (M2) and web push reminders (M5).
+
+#### Revised milestones
+
+- M2: sign-in, account, progress saved per learner, the redesigned reader with all four modes
+  persisted (lab ticks, drill answers, flashcard ratings), XP, streaks, weekly goal, installable PWA.
+- M3: part checkpoints, spaced-repetition review queue, lab/drill polish.
+- M4: search, glossary hover, notes and bookmarks. M5: certificates, admin, analytics, reminders
+  (email + push). M6: hardening, load test, accessibility audit, launch.
 
 ### M1 — Content pipeline and static reader
 
