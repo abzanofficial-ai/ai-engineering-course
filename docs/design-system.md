@@ -300,3 +300,13 @@ navigation as a scrolling row.
 - **Courses:** a card per course with level, summary, size, progress and Start/Continue.
 - **Side column:** a call to action for the next part checkpoint, a progress ring for the course,
   and the chapters in progress (then the next ones to start).
+
+### 6.3 Navigation from anywhere
+
+- **Phones (< 900px):** a fixed bottom tab bar on every page: Home · Course · Review · Progress ·
+  Notes. The current section is highlighted and marked `aria-current="page"`. The page gets
+  bottom padding so the bar never covers content, and toasts sit above it.
+- **Tablets and computers:** the same five links in the header.
+- **Course page:** a breadcrumb, "Home › course title".
+- The dashboard's side list shows only on wide screens (≥ 1100px), where it adds Glossary and
+  Certificates.

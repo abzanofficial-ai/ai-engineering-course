@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque } from "next/font/google";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
+import { HeaderNav, TabBar } from "@/components/app-nav";
 import { AccountPrompt, HeaderStatus } from "@/components/header-status";
 import { Icon } from "@/components/icons";
 import { LearnerProvider } from "@/components/learner/provider";
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <span className="mark" aria-hidden="true" />
                 <span>{brand.headerName}</span>
               </Link>
+              <HeaderNav course={course} />
               <HeaderStatus />
               <Link
                 className="icon-btn"
@@ -80,6 +82,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <a href={`mailto:${brand.supportEmail}`}>Contact support</a>
             </div>
           </footer>
+          <TabBar course={course} />
           <AccountPrompt />
           <Pwa />
         </LearnerProvider>

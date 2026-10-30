@@ -33,6 +33,14 @@ export function RouteView({ data }: { data: RouteData }) {
 
   return (
     <div className="wrap">
+      <nav aria-label="Breadcrumb">
+        <ol className="crumbs">
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          <li aria-current="page">{data.title}</li>
+        </ol>
+      </nav>
       <section className="hero" aria-labelledby="title">
         <h1 id="title">{data.title}</h1>
         <p>{brand.homeIntro}</p>

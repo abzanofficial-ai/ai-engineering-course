@@ -8,6 +8,10 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 #### Added
 
+- Navigation from anywhere: a bottom tab bar on phones (Home, Course, Review, Progress, Notes)
+  and the same links in the header on wider screens, with the current section highlighted. The
+  course page has a "Home ›" breadcrumb.
+
 - New look across the app: a soft blue-lavender background with gentle glows, light cards with
   rounder corners and soft shadows, an indigo accent, and a translucent header. Dark mode has
   its own navy and indigo equivalents. Every colour pair was checked for WCAG AA contrast
@@ -39,6 +43,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 - Unit: dashboard data from the real manifest; course progress.
 - E2E: signed-out start, signed-in Continue with progress, no sideways scroll on phones, and axe
   in light and dark, signed out and signed in.
+- E2E: Home and Course are reachable from a chapter on phones and computers, and the bottom bar
+  never covers the end of the page.
 
 ### M4 — Find and annotate
 

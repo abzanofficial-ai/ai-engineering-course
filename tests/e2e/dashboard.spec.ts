@@ -9,16 +9,21 @@ async function noViolations(page: Page) {
   expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target.join(" ")}`)).toEqual([]);
 }
 
-test("signed out, home lists the course and starts it on its learning path", async ({ page }) => {
+test("signed out, home lists the course and starts it on its learning path", async ({
+  page,
+  isMobile,
+}) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your courses");
   const card = page.getByRole("article", { name: "The AI Engineering Handbook" });
   await expect(card.getByText("Beginner → Job Ready")).toBeVisible();
   await expect(card).toContainText("29 chapters ready");
   await expect(card.getByRole("progressbar")).toHaveCount(0);
-  await expect(page.getByRole("navigation", { name: "Your learning" })).toContainText(
-    "Certificates",
-  );
+  // Wide screens add a side list (with Certificates); phones use the bottom tab bar instead.
+  if (!isMobile)
+    await expect(page.getByRole("navigation", { name: "Your learning" })).toContainText(
+      "Certificates",
+    );
   // The page never scrolls sideways on a phone.
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
     page.viewportSize()!.width,
