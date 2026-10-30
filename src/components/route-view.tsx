@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { defaultBranding as brand } from "@/lib/branding";
 import { partHue } from "@/lib/hues";
-import { averageProgress, pageProgress } from "@/lib/learner-state";
+import { averageProgress, courseProgress, pageProgress } from "@/lib/learner-state";
 import { formatLab, type RouteData, type RoutePage } from "@/lib/route-data";
 import { Icon } from "./icons";
 import { useLearner } from "./learner/provider";
@@ -23,10 +23,10 @@ export function RouteView({ data }: { data: RouteData }) {
       pages.filter((p) => p.status === "published").map((p) => p.spec),
       state,
     );
-  const coursePct = (() => {
-    const vals = data.parts.map((p) => partPct(p.pages)).filter((v): v is number => v !== null);
-    return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
-  })();
+  const coursePct = courseProgress(
+    data.parts.map((p) => p.pages.filter((x) => x.status === "published").map((x) => x.spec)),
+    state,
+  );
   const last = state.last && published.find((p) => p.key === state.last!.pageKey);
   const target = last ?? published[0]!;
   const week = state.week;

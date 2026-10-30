@@ -1,7 +1,14 @@
-import { redirect } from "next/navigation";
-import { defaultBranding } from "@/lib/branding";
+import { Dashboard } from "@/components/dashboard";
+import { dashboardCourse } from "@/lib/dashboard-data";
+import { defaultBranding as brand } from "@/lib/branding";
+import { getManifest, listCourses } from "@/lib/content";
 
-// The tenant's default course (ADR-0024); the platform can host several (ADR-0017).
+// The learner's home (ADR-0028). Lists every configured course; per-tenant course lists and
+// entitlement filtering arrive with Phase 2 and M5 (ADR-0023, ADR-0010).
 export default function Home() {
-  redirect(`/learn/${defaultBranding.defaultCourse}`);
+  const courses = listCourses().flatMap((c) => {
+    const m = getManifest(c.slug);
+    return m ? [dashboardCourse(c, m)] : [];
+  });
+  return <Dashboard courses={courses} providerCourse={brand.defaultCourse} intro={brand.tagline} />;
 }

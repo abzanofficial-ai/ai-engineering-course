@@ -5,11 +5,10 @@ import { COURSE } from "./helpers";
 const CH1 = `${COURSE}/1-python-for-ai-engineering`;
 const CAPSTONE = `${COURSE}/the-capstone-what-you-re-building-across-the-whole-book`;
 
-test("root opens the route: parts with outcomes, milestones and coming-soon chapters", async ({
+test("the learning path shows parts with outcomes, milestones and coming-soon chapters", async ({
   page,
 }) => {
-  await page.goto("/");
-  await expect(page).toHaveURL(COURSE);
+  await page.goto(COURSE);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("The AI Engineering Handbook");
   await expect(
     page.getByRole("heading", { name: "Part 1 · Programming Foundation" }),

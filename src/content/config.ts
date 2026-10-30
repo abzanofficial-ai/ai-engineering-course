@@ -6,6 +6,10 @@ export const courseConfigSchema = z.object({
   source: z.string(),
   /** Entitlement product that grants access (ADR-0010). */
   product: z.string(),
+  /** Dashboard card (ADR-0028): taken from the course's own wording, never invented. */
+  level: z.string().max(40).optional(),
+  summary: z.string().max(280).optional(),
+  icon: z.enum(["route", "brain", "prompt", "blocks"]).default("route"),
 });
 
 export const coursesFileSchema = z.object({ courses: z.array(courseConfigSchema).min(1) });

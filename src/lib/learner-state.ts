@@ -114,6 +114,12 @@ export function averageProgress(specs: PageSpec[], s: LearnerState): number | nu
   return Math.round(specs.reduce((n, p) => n + pageProgress(p, s), 0) / specs.length);
 }
 
+/** Course %: the average of its parts, so a long part does not swamp a short one. */
+export function courseProgress(parts: PageSpec[][], s: LearnerState): number {
+  const vals = parts.map((p) => averageProgress(p, s)).filter((v): v is number => v !== null);
+  return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+}
+
 const uniq = (xs: string[]) => [...new Set(xs)];
 
 /** Applies an action locally (optimistic UI). The server's response replaces it later. */

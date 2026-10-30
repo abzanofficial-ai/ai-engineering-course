@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </a>
           <header className="bar">
             <div className="wrap">
-              <Link href={`/learn/${course}`} className="brand">
+              <Link href="/" className="brand">
                 <span className="mark" aria-hidden="true" />
                 <span>{brand.headerName}</span>
               </Link>

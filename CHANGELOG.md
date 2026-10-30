@@ -4,6 +4,31 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Learner dashboard
+
+#### Added
+
+- `/` is now the learner's home (ADR-0028). It has:
+  - side navigation: Courses, Learning path, My progress, Review due, Notes and bookmarks,
+    Glossary, and Certificates (marked "soon"); on phones it becomes a scrolling row;
+  - a card per course with its level, summary, size, live progress and Start course or Continue;
+  - when signed in, this week's streak, XP, learning days and questions due.
+- Courses are listed from `content/courses.json`; new optional `level`, `summary` and `icon`
+  fields describe each card.
+- After deleting an account, home confirms that the data was deleted.
+
+#### Changed
+
+- The header brand link and the installed app's start page go to the dashboard.
+- Course progress uses one shared calculation (`courseProgress`) on the dashboard and the
+  learning path.
+
+#### Tests
+
+- Unit: dashboard data from the real manifest; course progress.
+- E2E: signed-out start, signed-in Continue with progress, no sideways scroll on phones, and axe
+  in light and dark, signed out and signed in.
+
 ### M4 — Find and annotate
 
 #### Added
