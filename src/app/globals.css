@@ -828,7 +828,7 @@ li a:not(.ch):not(.check-card) {
 }
 .ch-pct .bar-track {
   flex: 1;
-  background: var(--bg);
+  background: var(--line);
 }
 .ch-pct .bar-fill {
   background: var(--c);
