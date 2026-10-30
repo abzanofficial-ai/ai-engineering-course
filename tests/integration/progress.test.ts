@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { db } from "@/server/db/client";
-import { applyOps, clampDay, type Op } from "@/server/ops";
-import { loadState } from "@/server/state";
+import { applyOps, clampDay, type Op } from "@/server/repo/progress";
+import { loadState } from "@/server/repo/state";
+import { DEFAULT_TENANT_ID } from "@/server/repo/tenant";
 import { cardText } from "@/server/course-index";
 import { generated } from "@generated/index";
 import { COURSE, makeUser, TODAY } from "./helpers";
@@ -10,9 +10,10 @@ const manifest = generated[COURSE]!.manifest;
 const ch1 = manifest.pages.find((p) => p.key === "ch-1")!;
 const lab = ch1.sections.find((s) => s.key === "lab")!;
 const firstCard = ch1.cards[0]!;
+const ctx = (userId: string) => ({ tenantId: DEFAULT_TENANT_ID, userId });
 const run = (userId: string, ops: Op[]) =>
-  applyOps(db(), userId, { course: COURSE, day: TODAY, ops });
-const state = (userId: string) => loadState(db(), userId, COURSE, TODAY);
+  applyOps(ctx(userId), { course: COURSE, day: TODAY, ops });
+const state = (userId: string) => loadState(ctx(userId), COURSE, TODAY);
 
 describe("applyOps", () => {
   it("saves each kind of progress and awards XP once per item", async () => {

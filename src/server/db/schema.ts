@@ -1,7 +1,11 @@
-// Database schema (architecture §5). Auth tables follow Better Auth's generated shape;
-// every personal table starts its primary key with user_id and cascades on user delete,
-// so "delete my account" removes everything in one statement (UK GDPR).
+// Database schema (architecture §5, ADR-0023). Auth tables follow Better Auth's generated
+// shape and hold the global sign-in identity. Everything a tenant owns carries tenant_id and
+// starts its primary key with (tenant_id, user_id); it cascades on user delete, so "delete my
+// account" removes everything in one statement (UK GDPR).
+import { sql } from "drizzle-orm";
 import {
+  check,
+  jsonb,
   primaryKey,
   date,
   pgTable,
@@ -24,7 +28,8 @@ export const user = pgTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-  role: text("role").default("learner"),
+  /** Platform-wide role (ADR-0023): null, or "platform_owner". Tenant roles live in membership. */
+  platformRole: text("platform_role"),
 });
 
 export const session = pgTable(
@@ -94,6 +99,60 @@ export const rateLimit = pgTable("rate_limit", {
 });
 
 // ---------------------------------------------------------------------------
+// Tenancy (ADR-0023). One default tenant today; training centres become tenants in Phase 2.
+
+/** Tenant branding and settings (ADR-0024). Shape: TenantConfig in src/lib/branding.ts. */
+export const tenant = pgTable("tenant", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  status: text("status").notNull().default("active"),
+  config: jsonb("config").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const TENANT_ROLES = ["tenant_admin", "tutor", "learner"] as const;
+
+export const membership = pgTable(
+  "membership",
+  {
+    tenantId: text("tenant_id")
+      .notNull()
+      .references(() => tenant.id),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("learner"),
+    status: text("status").notNull().default("active"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.userId] }),
+    check("membership_role_check", sql`${t.role} in ('tenant_admin', 'tutor', 'learner')`),
+    check("membership_status_check", sql`${t.status} in ('active', 'deactivated')`),
+  ],
+);
+
+/** Which platform-owned courses a tenant offers, and which modules it has switched off. */
+export const tenantCourse = pgTable(
+  "tenant_course",
+  {
+    tenantId: text("tenant_id")
+      .notNull()
+      .references(() => tenant.id),
+    course: text("course").notNull(),
+    enabled: boolean("enabled").notNull().default(true),
+    disabledModules: jsonb("disabled_modules").$type<string[]>().notNull().default([]),
+  },
+  (t) => [primaryKey({ columns: [t.tenantId, t.course] })],
+);
+
+const tenantRef = () =>
+  text("tenant_id")
+    .notNull()
+    .references(() => tenant.id);
+
+// ---------------------------------------------------------------------------
 // Learning state. Content is referenced by stable string keys (ADR-0009): no foreign keys
 // into content, so re-imports can never delete progress. `client_ts` (ms) resolves offline
 // replays with last-write-wins.
@@ -106,18 +165,20 @@ const userRef = () =>
 export const sectionProgress = pgTable(
   "section_progress",
   {
+    tenantId: tenantRef(),
     userId: userRef(),
     course: text("course").notNull(),
     pageKey: text("page_key").notNull(),
     sectionKey: text("section_key").notNull(),
     readAt: timestamp("read_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.course, t.pageKey, t.sectionKey] })],
+  (t) => [primaryKey({ columns: [t.tenantId, t.userId, t.course, t.pageKey, t.sectionKey] })],
 );
 
 export const labStep = pgTable(
   "lab_step",
   {
+    tenantId: tenantRef(),
     userId: userRef(),
     course: text("course").notNull(),
     pageKey: text("page_key").notNull(),
@@ -127,12 +188,15 @@ export const labStep = pgTable(
     clientTs: bigint("client_ts", { mode: "number" }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.course, t.pageKey, t.labKey, t.stepKey] })],
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.userId, t.course, t.pageKey, t.labKey, t.stepKey] }),
+  ],
 );
 
 export const labCompletion = pgTable(
   "lab_completion",
   {
+    tenantId: tenantRef(),
     userId: userRef(),
     course: text("course").notNull(),
     pageKey: text("page_key").notNull(),
@@ -141,12 +205,13 @@ export const labCompletion = pgTable(
     clientTs: bigint("client_ts", { mode: "number" }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.course, t.pageKey, t.labKey] })],
+  (t) => [primaryKey({ columns: [t.tenantId, t.userId, t.course, t.pageKey, t.labKey] })],
 );
 
 export const drillAnswer = pgTable(
   "drill_answer",
   {
+    tenantId: tenantRef(),
     userId: userRef(),
     course: text("course").notNull(),
     pageKey: text("page_key").notNull(),
@@ -155,12 +220,13 @@ export const drillAnswer = pgTable(
     clientTs: bigint("client_ts", { mode: "number" }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.course, t.pageKey] })],
+  (t) => [primaryKey({ columns: [t.tenantId, t.userId, t.course, t.pageKey] })],
 );
 
 export const cardReview = pgTable(
   "card_review",
   {
+    tenantId: tenantRef(),
     userId: userRef(),
     course: text("course").notNull(),
     cardKey: text("card_key").notNull(),
@@ -172,7 +238,7 @@ export const cardReview = pgTable(
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [
-    primaryKey({ columns: [t.userId, t.course, t.cardKey] }),
+    primaryKey({ columns: [t.tenantId, t.userId, t.course, t.cardKey] }),
     index("card_review_due_idx").on(t.userId, t.course, t.dueAt),
   ],
 );
@@ -180,6 +246,7 @@ export const cardReview = pgTable(
 export const lastPosition = pgTable(
   "last_position",
   {
+    tenantId: tenantRef(),
     userId: userRef(),
     course: text("course").notNull(),
     pageKey: text("page_key").notNull(),
@@ -187,7 +254,7 @@ export const lastPosition = pgTable(
     sectionIndex: integer("section_index").notNull().default(0),
     clientTs: bigint("client_ts", { mode: "number" }).notNull(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.course] })],
+  (t) => [primaryKey({ columns: [t.tenantId, t.userId, t.course] })],
 );
 
 // ---------------------------------------------------------------------------
@@ -196,6 +263,7 @@ export const lastPosition = pgTable(
 export const xpEvent = pgTable(
   "xp_event",
   {
+    tenantId: tenantRef(),
     userId: userRef(),
     course: text("course").notNull(),
     /** Idempotency key, e.g. "step:ch-1:lab:step-3"; the PK makes double awards impossible. */
@@ -205,7 +273,7 @@ export const xpEvent = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [
-    primaryKey({ columns: [t.userId, t.course, t.eventId] }),
+    primaryKey({ columns: [t.tenantId, t.userId, t.course, t.eventId] }),
     index("xp_event_recent_idx").on(t.userId, t.course, t.createdAt),
   ],
 );
@@ -213,19 +281,23 @@ export const xpEvent = pgTable(
 export const activityDay = pgTable(
   "activity_day",
   {
+    tenantId: tenantRef(),
     userId: userRef(),
     day: date("day", { mode: "string" }).notNull(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.day] })],
+  (t) => [primaryKey({ columns: [t.tenantId, t.userId, t.day] })],
 );
 
-export const userSettings = pgTable("user_settings", {
-  userId: text("user_id")
-    .primaryKey()
-    .references(() => user.id, { onDelete: "cascade" }),
-  weeklyGoal: integer("weekly_goal").notNull().default(3),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const userSettings = pgTable(
+  "user_settings",
+  {
+    tenantId: tenantRef(),
+    userId: userRef(),
+    weeklyGoal: integer("weekly_goal").notNull().default(3),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.tenantId, t.userId] })],
+);
 
 // ---------------------------------------------------------------------------
 // Fixed-window rate limits for write endpoints (ADR-0012). Auth uses Better Auth's rate_limit.

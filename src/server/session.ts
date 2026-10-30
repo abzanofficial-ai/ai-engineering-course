@@ -6,14 +6,19 @@ export interface SessionUser {
   id: string;
   email: string;
   name: string;
-  role: string;
+  platformRole: "platform_owner" | null;
 }
 
 export async function getUser(headers: Headers): Promise<SessionUser | null> {
   const session = await getAuth().api.getSession({ headers });
   if (!session) return null;
-  const u = session.user as typeof session.user & { role?: string };
-  return { id: u.id, email: u.email, name: u.name, role: u.role ?? "learner" };
+  const u = session.user as typeof session.user & { platformRole?: string | null };
+  return {
+    id: u.id,
+    email: u.email,
+    name: u.name,
+    platformRole: u.platformRole === "platform_owner" ? "platform_owner" : null,
+  };
 }
 
 export class HttpError extends Error {
@@ -23,12 +28,6 @@ export class HttpError extends Error {
   ) {
     super(message);
   }
-}
-
-export async function requireUser(req: Request): Promise<SessionUser> {
-  const user = await getUser(req.headers);
-  if (!user) throw new HttpError(401, "Sign in to continue.");
-  return user;
 }
 
 /** State-changing requests must come from our own origin with a JSON body (CSRF defence). */

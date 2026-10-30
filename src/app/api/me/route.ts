@@ -1,10 +1,8 @@
-import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { deleteUser } from "@/server/account";
-import { db } from "@/server/db/client";
-import { user as userTable } from "@/server/db/schema";
+import { requireContext } from "@/server/context";
 import { log } from "@/server/log";
-import { errorResponse, HttpError, requireSameOriginJson, requireUser } from "@/server/session";
+import { deleteUser, updateName } from "@/server/repo/account";
+import { errorResponse, HttpError, requireSameOriginJson } from "@/server/session";
 
 const profileSchema = z.object({ name: z.string().trim().min(1).max(80) });
 const deleteSchema = z.object({ confirmEmail: z.string() });
@@ -13,9 +11,9 @@ const deleteSchema = z.object({ confirmEmail: z.string() });
 export async function PATCH(req: Request) {
   try {
     requireSameOriginJson(req);
-    const user = await requireUser(req);
+    const { ctx } = await requireContext(req, "own:account");
     const { name } = profileSchema.parse(await req.json());
-    await db().update(userTable).set({ name }).where(eq(userTable.id, user.id));
+    await updateName(ctx, name);
     return Response.json({ ok: true, name });
   } catch (err) {
     return errorResponse(err);
@@ -26,11 +24,11 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   try {
     requireSameOriginJson(req);
-    const user = await requireUser(req);
+    const { ctx, user } = await requireContext(req, "own:account");
     const { confirmEmail } = deleteSchema.parse(await req.json());
     if (confirmEmail.trim().toLowerCase() !== user.email.toLowerCase())
       throw new HttpError(400, "That email doesn't match your account.");
-    await deleteUser(db(), user.id);
+    await deleteUser(ctx);
     log.info("account.deleted");
     const res = Response.json({ ok: true });
     for (const name of ["better-auth.session_token", "__Secure-better-auth.session_token"])

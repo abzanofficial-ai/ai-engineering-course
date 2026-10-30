@@ -211,3 +211,43 @@ describe("sign-in rate limits", () => {
     expect(statuses[5]).toBeGreaterThanOrEqual(400);
   });
 });
+
+describe("tenancy and roles (ADR-0023)", () => {
+  it("resolves the default tenant and ignores any tenant named in the request", async () => {
+    const { resolveTenant } = await import("@/server/tenant");
+    const sneaky = new Request("http://localhost:3000/api/me/state?tenant=other&tenantId=other", {
+      headers: { "x-tenant": "other", "x-tenant-id": "other", cookie: "tenant=other" },
+    });
+    expect((await resolveTenant(sneaky)).id).toBe("tnt_default");
+  });
+
+  it("creates a learner membership in the default tenant on first use", async () => {
+    const a = await signIn("member@example.test");
+    await stateRoute.GET(req(`/api/me/state?course=${COURSE}`, a));
+    const rows = await db().execute(
+      (await import("drizzle-orm"))
+        .sql`select m.tenant_id, m.role from membership m join "user" u on u.id = m.user_id where u.email = 'member@example.test'`,
+    );
+    expect([...rows]).toEqual([{ tenant_id: "tnt_default", role: "learner" }]);
+  });
+
+  it("gives ADMIN_EMAILS the platform_owner role, and nobody else", async () => {
+    // ADMIN_EMAILS=owner@example.test is set for the integration project (vitest.config.ts).
+    const owner = await signIn("owner@example.test");
+    const learner = await signIn("plain@example.test");
+    const o = await (await stateRoute.GET(req(`/api/me/state?course=${COURSE}`, owner))).json();
+    const l = await (await stateRoute.GET(req(`/api/me/state?course=${COURSE}`, learner))).json();
+    expect(o.user.platformRole).toBe("platform_owner");
+    expect(l.user.platformRole).toBeNull();
+  });
+
+  it("a deactivated membership loses access to personal routes", async () => {
+    const a = await signIn("deactivated@example.test");
+    await stateRoute.GET(req(`/api/me/state?course=${COURSE}`, a));
+    await db().execute(
+      (await import("drizzle-orm"))
+        .sql`update membership set status = 'deactivated' where user_id = (select id from "user" where email = 'deactivated@example.test')`,
+    );
+    expect((await stateRoute.GET(req(`/api/me/state?course=${COURSE}`, a))).status).toBe(403);
+  });
+});

@@ -7,7 +7,8 @@ import { addDays } from "@/lib/dates";
 import { clampGoal, DRILL_MIN_CHARS, XP } from "@/lib/engagement";
 import { nextReview } from "@/lib/srs";
 import type { Batch, Op, OpResult } from "@/lib/ops-schema";
-import type { Db } from "./db/client";
+import type { Ctx } from "../context";
+import { db, type Db } from "../db/client";
 import {
   activityDay,
   cardReview,
@@ -18,8 +19,8 @@ import {
   sectionProgress,
   userSettings,
   xpEvent,
-} from "./db/schema";
-import { courseIndex, type CourseIndex } from "./course-index";
+} from "../db/schema";
+import { courseIndex, type CourseIndex } from "../course-index";
 
 /** Accept the client's date only within ±1 day of the server's UTC date (ADR-0019). */
 export function clampDay(day: string, now = new Date()): string {
@@ -33,6 +34,7 @@ type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 
 async function award(
   tx: Tx,
+  tenantId: string,
   userId: string,
   course: string,
   eventId: string,
@@ -41,7 +43,7 @@ async function award(
 ) {
   const rows = await tx
     .insert(xpEvent)
-    .values({ userId, course, eventId, points, label })
+    .values({ tenantId, userId, course, eventId, points, label })
     .onConflictDoNothing()
     .returning({ points: xpEvent.points });
   return rows.length ? points : 0;
@@ -66,18 +68,15 @@ function validate(op: Op, idx: CourseIndex): string | null {
   }
 }
 
-export async function applyOps(
-  db: Db,
-  userId: string,
-  batch: Batch,
-  now = new Date(),
-): Promise<OpResult[]> {
+/** Applies a batch for the learner in `ctx` (tenant and user scope come only from ctx). */
+export async function applyOps(ctx: Ctx, batch: Batch, now = new Date()): Promise<OpResult[]> {
+  const { tenantId, userId } = ctx;
   const idx = courseIndex(batch.course);
   if (!idx) return batch.ops.map(() => ({ ok: false, error: "unknown course" }));
   const course = batch.course;
   const day = clampDay(batch.day, now);
 
-  return db.transaction(async (tx) => {
+  return db().transaction(async (tx) => {
     const results: OpResult[] = [];
     for (const op of batch.ops) {
       const error = validate(op, idx);
@@ -90,10 +89,11 @@ export async function applyOps(
         case "section_read":
           await tx
             .insert(sectionProgress)
-            .values({ userId, course, pageKey: op.page, sectionKey: op.section })
+            .values({ tenantId, userId, course, pageKey: op.page, sectionKey: op.section })
             .onConflictDoNothing();
           xp = await award(
             tx,
+            tenantId,
             userId,
             course,
             `read:${op.page}:${op.section}`,
@@ -105,6 +105,7 @@ export async function applyOps(
           await tx
             .insert(labStep)
             .values({
+              tenantId,
               userId,
               course,
               pageKey: op.page,
@@ -115,6 +116,7 @@ export async function applyOps(
             })
             .onConflictDoUpdate({
               target: [
+                labStep.tenantId,
                 labStep.userId,
                 labStep.course,
                 labStep.pageKey,
@@ -127,6 +129,7 @@ export async function applyOps(
           if (op.done)
             xp = await award(
               tx,
+              tenantId,
               userId,
               course,
               `step:${op.page}:${op.lab}:${op.step}`,
@@ -138,6 +141,7 @@ export async function applyOps(
           await tx
             .insert(labCompletion)
             .values({
+              tenantId,
               userId,
               course,
               pageKey: op.page,
@@ -147,6 +151,7 @@ export async function applyOps(
             })
             .onConflictDoUpdate({
               target: [
+                labCompletion.tenantId,
                 labCompletion.userId,
                 labCompletion.course,
                 labCompletion.pageKey,
@@ -158,6 +163,7 @@ export async function applyOps(
           if (op.done)
             xp = await award(
               tx,
+              tenantId,
               userId,
               course,
               `commit:${op.page}:${op.lab}`,
@@ -169,6 +175,7 @@ export async function applyOps(
           await tx
             .insert(drillAnswer)
             .values({
+              tenantId,
               userId,
               course,
               pageKey: op.page,
@@ -177,13 +184,19 @@ export async function applyOps(
               clientTs: op.ts,
             })
             .onConflictDoUpdate({
-              target: [drillAnswer.userId, drillAnswer.course, drillAnswer.pageKey],
+              target: [
+                drillAnswer.tenantId,
+                drillAnswer.userId,
+                drillAnswer.course,
+                drillAnswer.pageKey,
+              ],
               set: { answer: op.answer, revealed: op.revealed, clientTs: op.ts, updatedAt: now },
               setWhere: sql`${drillAnswer.clientTs} <= ${op.ts}`,
             });
           if (op.revealed && op.answer.trim().length >= DRILL_MIN_CHARS)
             xp = await award(
               tx,
+              tenantId,
               userId,
               course,
               `drill:${op.page}`,
@@ -197,6 +210,7 @@ export async function applyOps(
             .from(cardReview)
             .where(
               and(
+                eq(cardReview.tenantId, tenantId),
                 eq(cardReview.userId, userId),
                 eq(cardReview.course, course),
                 eq(cardReview.cardKey, op.card),
@@ -207,6 +221,7 @@ export async function applyOps(
             await tx
               .insert(cardReview)
               .values({
+                tenantId,
                 userId,
                 course,
                 cardKey: op.card,
@@ -217,7 +232,12 @@ export async function applyOps(
                 clientTs: op.ts,
               })
               .onConflictDoUpdate({
-                target: [cardReview.userId, cardReview.course, cardReview.cardKey],
+                target: [
+                  cardReview.tenantId,
+                  cardReview.userId,
+                  cardReview.course,
+                  cardReview.cardKey,
+                ],
                 set: {
                   rating: op.rating,
                   box: next.box,
@@ -227,13 +247,22 @@ export async function applyOps(
                 },
               });
           }
-          xp = await award(tx, userId, course, `card:${op.card}`, XP.cardRated, "Flashcard rated");
+          xp = await award(
+            tx,
+            tenantId,
+            userId,
+            course,
+            `card:${op.card}`,
+            XP.cardRated,
+            "Flashcard rated",
+          );
           break;
         }
         case "position":
           await tx
             .insert(lastPosition)
             .values({
+              tenantId,
               userId,
               course,
               pageKey: op.page,
@@ -242,7 +271,7 @@ export async function applyOps(
               clientTs: op.ts,
             })
             .onConflictDoUpdate({
-              target: [lastPosition.userId, lastPosition.course],
+              target: [lastPosition.tenantId, lastPosition.userId, lastPosition.course],
               set: { pageKey: op.page, mode: op.mode, sectionIndex: op.index, clientTs: op.ts },
               setWhere: sql`${lastPosition.clientTs} <= ${op.ts}`,
             });
@@ -250,9 +279,9 @@ export async function applyOps(
         case "goal":
           await tx
             .insert(userSettings)
-            .values({ userId, weeklyGoal: clampGoal(op.weeklyGoal) })
+            .values({ tenantId, userId, weeklyGoal: clampGoal(op.weeklyGoal) })
             .onConflictDoUpdate({
-              target: userSettings.userId,
+              target: [userSettings.tenantId, userSettings.userId],
               set: { weeklyGoal: clampGoal(op.weeklyGoal), updatedAt: now },
             });
           break;
@@ -261,7 +290,7 @@ export async function applyOps(
     }
     // Any learning action counts towards the streak, even when its XP was already earned.
     if (results.some((r, i) => r.ok && !["position", "goal"].includes(batch.ops[i]!.type))) {
-      await tx.insert(activityDay).values({ userId, day }).onConflictDoNothing();
+      await tx.insert(activityDay).values({ tenantId, userId, day }).onConflictDoNothing();
     }
     return results;
   });

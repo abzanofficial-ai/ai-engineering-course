@@ -29,7 +29,8 @@ function createAuth() {
     trustedOrigins: [env().APP_URL],
     database: drizzleAdapter(db(), { provider: "pg", schema }),
     user: {
-      additionalFields: { role: { type: "string", defaultValue: "learner", input: false } },
+      // Platform role only; tenant roles live in membership (ADR-0023).
+      additionalFields: { platformRole: { type: "string", required: false, input: false } },
     },
     session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },
     socialProviders: googleEnabled()
@@ -50,7 +51,7 @@ function createAuth() {
           before: async (user) => ({
             data: {
               ...user,
-              role: adminEmails().has(user.email.toLowerCase()) ? "admin" : "learner",
+              platformRole: adminEmails().has(user.email.toLowerCase()) ? "platform_owner" : null,
             },
           }),
         },
@@ -61,7 +62,7 @@ function createAuth() {
         expiresIn: 600,
         sendMagicLink: async ({ email, url }) => {
           // Per-address limit on top of the per-IP one: 5 links per hour (architecture §6.3).
-          if (!(await allow(db(), `magic:${hashEmail(email)}`, 5, 3600))) {
+          if (!(await allow(`magic:${hashEmail(email)}`, 5, 3600))) {
             log.warn("auth.magic_link_rate_limited", { email: hashEmail(email) });
             throw new Error("Too many sign-in links requested. Try again in an hour.");
           }

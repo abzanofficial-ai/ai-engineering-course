@@ -21,7 +21,7 @@ export type SaveStatus = "saved" | "saving" | "offline";
 
 interface LearnerContext {
   status: Status;
-  user: { name: string; email: string; role: string } | null;
+  user: { name: string; email: string; platformRole: string | null } | null;
   state: LearnerState;
   save: SaveStatus;
   dispatch: (op: OpInput) => void;

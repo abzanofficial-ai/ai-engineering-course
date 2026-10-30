@@ -1,11 +1,12 @@
-// Loads one learner's state for one course. Every query is filtered by the userId from
-// the session — the only way personal data leaves the database (architecture §8).
+// Loads one learner's state for one course. Every query is filtered by the tenant and user in
+// `ctx` — the only way personal data leaves the database (architecture §8, ADR-0023).
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { addDays, weekStart } from "@/lib/dates";
 import { streakFrom, weekFrom } from "@/lib/engagement";
 import type { LearnerState } from "@/lib/learner-state";
-import type { Db } from "./db/client";
+import type { Ctx } from "../context";
+import { db as getDb } from "../db/client";
 import {
   activityDay,
   cardReview,
@@ -16,16 +17,13 @@ import {
   sectionProgress,
   userSettings,
   xpEvent,
-} from "./db/schema";
+} from "../db/schema";
 
-export async function loadState(
-  db: Db,
-  userId: string,
-  course: string,
-  today: string,
-): Promise<LearnerState> {
-  const mine = (t: { userId: AnyPgColumn; course: AnyPgColumn }) =>
-    and(eq(t.userId, userId), eq(t.course, course));
+export async function loadState(ctx: Ctx, course: string, today: string): Promise<LearnerState> {
+  const { tenantId, userId } = ctx;
+  const db = getDb();
+  const mine = (t: { tenantId: AnyPgColumn; userId: AnyPgColumn; course: AnyPgColumn }) =>
+    and(eq(t.tenantId, tenantId), eq(t.userId, userId), eq(t.course, course));
 
   const [reads, steps, commits, drills, cards, last, xpTotal, xpWeek, recent, days, settings] =
     await Promise.all([
@@ -69,11 +67,17 @@ export async function loadState(
       db
         .select({ d: activityDay.day })
         .from(activityDay)
-        .where(and(eq(activityDay.userId, userId), gte(activityDay.day, addDays(today, -400)))),
+        .where(
+          and(
+            eq(activityDay.tenantId, tenantId),
+            eq(activityDay.userId, userId),
+            gte(activityDay.day, addDays(today, -400)),
+          ),
+        ),
       db
         .select({ g: userSettings.weeklyGoal })
         .from(userSettings)
-        .where(eq(userSettings.userId, userId)),
+        .where(and(eq(userSettings.tenantId, tenantId), eq(userSettings.userId, userId))),
     ]);
 
   const state: LearnerState = {

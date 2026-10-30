@@ -30,6 +30,7 @@ export default defineConfig({
               process.env.TEST_DATABASE_URL ??
               "postgres://lms:lms_local_only@localhost:5432/lms_test",
             EMAIL_TRANSPORT: "memory",
+            ADMIN_EMAILS: "owner@example.test",
             NODE_ENV: "test",
           },
         },

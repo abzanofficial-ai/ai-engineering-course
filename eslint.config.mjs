@@ -41,6 +41,35 @@ const config = [
     },
   },
   { files: HTML_RENDERERS, rules: { "no-restricted-syntax": "off" } },
+  {
+    // ADR-0023: personal data is reached only through src/server/repo/*, which applies the
+    // tenant and user scope. Everything else must not import the database client.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: [
+      "src/server/repo/**",
+      "src/server/db/**",
+      "src/server/auth-config.ts",
+      "src/server/rate-limit.ts",
+      "src/app/api/health/route.ts",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/db/client", "@/server/db/client"],
+              message: "Use a repository in src/server/repo (tenant-scoped, ADR-0023).",
+            },
+            {
+              group: ["**/db/schema", "@/server/db/schema"],
+              message: "Use a repository in src/server/repo (tenant-scoped, ADR-0023).",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 export default config;
