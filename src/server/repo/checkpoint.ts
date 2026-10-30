@@ -17,6 +17,7 @@ import { courseIndex } from "../course-index";
 import { db } from "../db/client";
 import { activityDay, cardReview, checkpointAttempt, xpEvent } from "../db/schema";
 import { clampDay, isDisabled } from "./progress";
+import { loadAccess, pageAccess } from "./commerce";
 import { courseAccess } from "./tenant";
 
 export const checkpointSchema = z.object({
@@ -47,6 +48,12 @@ export async function submitCheckpoint(
     isDisabled(access.disabledModules, content.drillPages[0] ?? "", idx)
   )
     return { ok: false, error: "checkpoint not available" };
+  // ADR-0030: a checkpoint covers the part's paid pages, so it needs the same access.
+  if (
+    !pageAccess(await loadAccess(ctx, input.course, now), { key: "", partNumber: input.part })
+      .allowed
+  )
+    return { ok: false, error: "no access" };
 
   return db().transaction(async (tx) => {
     const [{ n }] = (await tx

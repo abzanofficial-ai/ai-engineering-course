@@ -23,6 +23,7 @@ import {
   xpEvent,
 } from "../db/schema";
 import { courseIndex, type CourseIndex } from "../course-index";
+import { loadAccess, pageAccess } from "./commerce";
 import { courseAccess } from "./tenant";
 
 /** Accept the client's date only within ±1 day of the server's UTC date (ADR-0019). */
@@ -93,6 +94,11 @@ export async function applyOps(ctx: Ctx, batch: Batch, now = new Date()): Promis
   const access = await courseAccess(tenantId, batch.course);
   if (!access.enabled) return batch.ops.map(() => ({ ok: false, error: "course not available" }));
   const disabled = (page: string) => isDisabled(access.disabledModules, page, idx);
+  // ADR-0030: paid pages need a licence, seat, purchase or grant (always true in launch mode).
+  const paid = await loadAccess(ctx, batch.course, now);
+  const parts = new Map(idx.manifest.pages.map((p) => [p.key, p.partNumber]));
+  const allowed = (page: string) =>
+    pageAccess(paid, { key: page, partNumber: parts.get(page) ?? -1 }).allowed;
   const course = batch.course;
   const day = clampDay(batch.day, now);
 
@@ -100,7 +106,10 @@ export async function applyOps(ctx: Ctx, batch: Batch, now = new Date()): Promis
     const results: OpResult[] = [];
     for (const op of batch.ops) {
       const page = "page" in op ? op.page : op.type === "card" ? idx.cards.get(op.card) : undefined;
-      const error = validate(op, idx) ?? (page && disabled(page) ? "module not available" : null);
+      const error =
+        validate(op, idx) ??
+        (page && disabled(page) ? "module not available" : null) ??
+        (page && !allowed(page) ? "no access" : null);
       if (error) {
         results.push({ ok: false, error });
         continue;
