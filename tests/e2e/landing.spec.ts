@@ -28,6 +28,7 @@ test("the landing page is ready for search engines and social sharing", async ({
   // The numbers come from the course itself.
   await expect(page.getByText("Hands-on lab steps")).toBeVisible();
   await expect(page.locator(".lp-stats")).toContainText("231");
+  await expect(page.locator("#route")).toContainText("29 of 47 chapters are ready today");
   // No promises the course can't keep.
   await expect(page.locator("main")).not.toContainText(/guarantee|\$200,000|200k/i);
 });

@@ -14,7 +14,8 @@ import { routeData } from "@/lib/route-data";
 const COURSE = brand.defaultCourse;
 const manifest = getManifest(COURSE)!;
 const route = routeData(COURSE, manifest);
-const chaptersAll = manifest.pages.filter((p) => p.kind === "chapter");
+// "47 chapters, plus a quick-start Chapter 0" (How to use this book): count Chapters 1 onwards.
+const chaptersAll = manifest.pages.filter((p) => p.kind === "chapter" && (p.number ?? 0) > 0);
 const chaptersReady = chaptersAll.filter((p) => p.status === "published").length;
 const terms = getGlossary(COURSE).length;
 const ch1 = manifest.pages.find((p) => p.key === "ch-1")!;
