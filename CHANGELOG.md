@@ -8,6 +8,19 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 #### Added
 
+- Motion and lazy rendering on the landing page, all CSS. It works without JavaScript and is
+  switched off entirely with "reduce motion":
+  - the fifteen parts orbit slowly and stay upright, and the dashed track turns;
+  - milestone parts pulse, the centre glows, and parts pop in one by one and grow on hover;
+  - the hero copy and numbers arrive in sequence, the headline gradient drifts, and the main
+    button catches a light sweep;
+  - sections, cards, route stops and FAQ rise in as they scroll into view, and the capstone
+    layers slide in;
+  - below-the-fold sections render only when they come near the screen
+    (`content-visibility: auto`).
+    Content is never hidden waiting for an animation; browsers without scroll-driven animations
+    simply show it.
+
 - A public landing page at `/`, built only from the course's own facts (design-system §6.4):
   - a hero and the real counts;
   - four finish lines: get hired, freelance, build your own product, lead the decisions;

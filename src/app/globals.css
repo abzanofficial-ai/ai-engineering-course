@@ -2990,9 +2990,11 @@ body:has(.lp) {
   color: #ffffff;
   background: hsl(var(--h) 70% 48%);
   box-shadow: 0 6px 16px hsl(var(--h) 70% 40% / 0.35);
-  transform: rotate(var(--a)) translateY(-35cqi) rotate(calc(-1 * var(--a)));
-  animation: lp-pop 0.6s ease both;
+  transform: rotate(calc(var(--a) + var(--spin))) translateY(-35cqi)
+    rotate(calc(-1 * (var(--a) + var(--spin))));
+  animation: lp-pop 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
   animation-delay: var(--d);
+  transition: scale 0.2s ease;
 }
 .lp-star-big {
   width: 52px;
@@ -3297,7 +3299,9 @@ body:has(.lp) {
   border-radius: 14px;
   color: #ffffff;
   font-weight: 600;
-  background: linear-gradient(
+  /* Solid colour under the gradient, so contrast is measurable and holds if gradients fail. */
+  background-color: hsl(calc(258 - var(--i) * 14) 62% 30%);
+  background-image: linear-gradient(
     100deg,
     hsl(calc(250 - var(--i) * 14) 62% 34%),
     hsl(calc(266 - var(--i) * 14) 62% 28%)
@@ -3310,7 +3314,6 @@ body:has(.lp) {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.9;
 }
 
 /* Centres, FAQ, final call */
@@ -3393,6 +3396,244 @@ body:has(.lp) {
     animation: none;
   }
   .lp-btn {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------- Landing motion and lazy rendering
+   CSS only, so it also works without JavaScript. Content is never hidden waiting for an
+   animation: browsers without support simply show it. Everything stops for reduced motion. */
+@property --spin {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+.lp-hero-art {
+  --spin: 0deg;
+  animation: lp-spin 90s linear infinite;
+}
+@keyframes lp-spin {
+  to {
+    --spin: 360deg;
+  }
+}
+/* Only the dashed track turns; the parts move along it through --spin and stay upright. */
+.lp-orbit {
+  border-color: transparent;
+}
+.lp-orbit::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 50%;
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 35%, transparent);
+  animation: lp-dash 60s linear infinite reverse;
+}
+@keyframes lp-dash {
+  to {
+    rotate: 360deg;
+  }
+}
+.lp-star:hover {
+  scale: 1.18;
+  z-index: 2;
+}
+.lp-star-big::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid hsl(var(--h) 70% 55%);
+  animation: lp-pulse 2.4s ease-out infinite;
+}
+@keyframes lp-pulse {
+  from {
+    opacity: 0.8;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1.7;
+  }
+}
+.lp-core {
+  animation: lp-breathe 5s ease-in-out infinite;
+}
+@keyframes lp-breathe {
+  50% {
+    box-shadow:
+      var(--shadow),
+      0 0 0 10px color-mix(in srgb, var(--accent) 12%, transparent),
+      0 0 48px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+}
+/* The headline's gradient drifts; the primary button catches a light sweep. */
+.lp-grad {
+  background-size: 200% 100%;
+  animation: lp-shimmer 8s ease-in-out infinite alternate;
+}
+@keyframes lp-shimmer {
+  to {
+    background-position: 100% 0;
+  }
+}
+.lp-btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.lp-btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgb(255 255 255 / 0.35) 50%,
+    transparent 70%
+  );
+  translate: -120% 0;
+  animation: lp-sheen 4.5s ease-in-out 1.5s infinite;
+}
+@keyframes lp-sheen {
+  30%,
+  100% {
+    translate: 120% 0;
+  }
+}
+/* Hero copy arrives in sequence on load. */
+.lp-hero-copy > * {
+  animation: lp-rise-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.lp-hero-copy > :nth-child(2) {
+  animation-delay: 0.08s;
+}
+.lp-hero-copy > :nth-child(3) {
+  animation-delay: 0.16s;
+}
+.lp-hero-copy > :nth-child(4) {
+  animation-delay: 0.24s;
+}
+.lp-hero-copy > :nth-child(5) {
+  animation-delay: 0.32s;
+}
+@keyframes lp-rise-in {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+.lp-stats > div {
+  animation: lp-rise-in 0.6s ease both;
+}
+.lp-stats > div:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.lp-stats > div:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.lp-stats > div:nth-child(4) {
+  animation-delay: 0.24s;
+}
+.lp-stats > div:nth-child(5) {
+  animation-delay: 0.32s;
+}
+.lp-final {
+  background-size: 160% 160%;
+  animation: lp-drift 14s ease-in-out infinite alternate;
+}
+@keyframes lp-drift {
+  to {
+    background-position: 100% 50%;
+  }
+}
+/* Cards lift on hover. */
+.lp-goal,
+.lp-mode,
+.lp-promises li,
+.lp-stop-body,
+.lp-feature {
+  transition:
+    translate 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.lp-goal:hover,
+.lp-mode:hover,
+.lp-promises li:hover {
+  translate: 0 -4px;
+  box-shadow:
+    var(--shadow),
+    0 16px 40px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.lp-stop-body:hover {
+  translate: 4px 0;
+}
+
+/* Lazy rendering: below-the-fold sections are skipped until they come near the screen. */
+.lp-section,
+.lp-final {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* Scroll reveal, driven by the scroll position itself (no observers, nothing hidden at rest). */
+@supports (animation-timeline: view()) {
+  .lp-section h2,
+  .lp-section .lp-sub,
+  .lp-goal,
+  .lp-mode,
+  .lp-promises li,
+  .lp-stop,
+  .lp-feature,
+  .lp-faq details,
+  .lp-centres {
+    animation: lp-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 70%;
+  }
+  .lp-layers li {
+    animation: lp-slide linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 80%;
+  }
+}
+@keyframes lp-reveal {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+    scale: 0.98;
+  }
+}
+@keyframes lp-slide {
+  from {
+    opacity: 0;
+    translate: 60px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-hero-art,
+  .lp-orbit::before,
+  .lp-core,
+  .lp-grad,
+  .lp-btn-primary::after,
+  .lp-hero-copy > *,
+  .lp-stats > div,
+  .lp-final,
+  .lp-star-big::after,
+  .lp-section *,
+  .lp-layers li {
+    animation: none !important;
+  }
+  .lp-btn-primary::after,
+  .lp-star-big::after {
+    display: none;
+  }
+  .lp-goal,
+  .lp-mode,
+  .lp-promises li,
+  .lp-stop-body,
+  .lp-feature,
+  .lp-star {
     transition: none;
   }
 }
