@@ -4,6 +4,19 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Plum palette across the app
+
+#### Changed
+
+- New palette everywhere (design-system §6.5):
+  - plum dark mode and blush light mode, following the reader's system setting;
+  - peach → pink → lavender gradients on headlines, primary buttons, progress bars, the
+    landing ring, hero glows and banners, while reading surfaces stay solid and calm;
+  - part colours follow the same family, and chapter headers blend into the page colour;
+  - code blocks are white in light mode;
+  - the brand mark, theme colours and share image are updated.
+- Accessibility: all axe suites pass in light and dark.
+
 ### Landing page and SEO
 
 #### Added

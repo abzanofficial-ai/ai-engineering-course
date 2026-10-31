@@ -12,17 +12,14 @@
     "appleTouch": "/icons/apple-touch-icon.png"
   },
   "colors": {
-    "mark": [
-      "hsl(175 70% 40%)",
-      "hsl(220 70% 50%)",
-      "hsl(280 60% 55%)",
-      "hsl(330 65% 52%)",
-      "hsl(25 85% 50%)"
-    ],
-    "themeLight": "#e9eef7",
-    "themeDark": "#0e1124"
+    "mark": ["hsl(30 90% 70%)", "hsl(340 70% 72%)", "hsl(270 75% 78%)", "hsl(320 60% 60%)"],
+    "themeLight": "#fbf3f6",
+    "themeDark": "#1a0f1f"
   },
-  "email": { "fromName": "AI Engineering Handbook", "fromAddress": "no-reply@example.com" },
+  "email": {
+    "fromName": "AI Engineering Handbook",
+    "fromAddress": "no-reply@example.com"
+  },
   "supportEmail": "support@example.com",
   "footer": "The AI Engineering Handbook",
   "certificate": {

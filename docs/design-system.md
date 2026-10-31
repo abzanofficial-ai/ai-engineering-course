@@ -333,3 +333,21 @@ on earnings claims and fake reviews).
 - **Absolute URLs** come from `APP_URL` at build time, so set it to the real domain before
   `pnpm build`.
 - **Signed-in learners** visiting `/` go straight to `/home`.
+
+### 6.5 Revision 4: plum palette (owner choice, 2026-10-31)
+
+The owner preferred a plum, pink and peach direction and asked for something modern, with shine
+that doesn't distract. The rule is to put the shine in the frame and keep it out from under the
+text:
+
+- **Gradients go on:** headlines (`--grad-1/2/3`, peach to pink to lavender), primary buttons
+  (`--btn-grad`), progress bars (`--bar-grad`), the landing ring, hero glows and banners.
+- **Reading stays on solid, calm cards.** Code blocks are plain white in light mode so syntax
+  colours keep their contrast.
+- **Dark (plum):** background `#1a0f1f`, cards `#2a1a31`, ink `#f7eef3`, accent `#e8a3c4`.
+- **Light (blush):** background `#fbf3f6`, cards `#fffafc`, ink `#2a1527`, accent `#a3487a`.
+- The reader's system setting chooses between the two.
+- **Part hues** run peach → pink → lavender (`src/lib/hues.ts`). Chapter headers blend the part
+  tint into the page colour so warm parts never turn muddy in dark mode.
+- **Contrast:** every text pair is at least 4.5:1 and every UI or graphic pair at least 3:1,
+  computed for both themes and enforced by the axe suites on every page type.
