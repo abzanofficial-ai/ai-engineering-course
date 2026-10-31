@@ -83,7 +83,7 @@ export function AccountForms({ name, email }: { name: string; email: string }) {
             clearLearnerStorage();
             // A full reload clears the in-memory learner state and outbox for this tab.
             // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-            window.location.href = "/";
+            window.location.href = "/home";
           }}
         >
           Sign out on this device
@@ -107,7 +107,7 @@ export function AccountForms({ name, email }: { name: string; email: string }) {
             if (r.ok) {
               clearLearnerStorage();
               // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-              window.location.href = "/?deleted=1";
+              window.location.href = "/home?deleted=1";
             } else setDelMsg(r.error ?? "Couldn't delete. Try again.");
           }}
         >

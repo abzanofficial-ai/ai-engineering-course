@@ -19,6 +19,8 @@ const courses: CourseAccess[] = coursesFile.courses.map((c) => ({
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const session = getSessionCookie(request);
+  // The landing page is for visitors; signed-in learners go straight to their dashboard.
+  if (pathname === "/" && session) return NextResponse.redirect(new URL("/home", request.url));
   if (needsSession(pathname, courses) && !session) {
     const url = new URL("/sign-in", request.url);
     url.searchParams.set("next", pathname + search);
@@ -42,6 +44,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/learn/:path*",
     "/account/:path*",
     "/account",

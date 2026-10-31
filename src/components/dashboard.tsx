@@ -185,7 +185,7 @@ export function Dashboard({
     // Shown once after "Delete my account" sends the learner here.
     if (new URLSearchParams(window.location.search).get("deleted") === "1") {
       setDeleted(true); // eslint-disable-line react-hooks/set-state-in-effect
-      window.history.replaceState(null, "", "/");
+      window.history.replaceState(null, "", "/home");
     }
   }, []);
   const main = `/learn/${providerCourse}`;
@@ -208,7 +208,7 @@ export function Dashboard({
   const chapterList = [...inProgress, ...fresh].slice(0, 4);
 
   const nav = [
-    { href: "/", label: "Home", icon: "courses", current: true },
+    { href: "/home", label: "Home", icon: "courses", current: true },
     { href: main, label: "Learning path", icon: "path" },
     { href: "/progress", label: "My progress", icon: "chart" },
     { href: "/review", label: "Review due", icon: "review" },

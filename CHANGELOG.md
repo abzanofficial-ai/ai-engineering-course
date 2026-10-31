@@ -4,6 +4,40 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Landing page and SEO
+
+#### Added
+
+- A public landing page at `/`, built only from the course's own facts (design-system §6.4):
+  - a hero and the real counts;
+  - four finish lines: get hired, freelance, build your own product, lead the decisions;
+  - the three promises and the four chapter modes;
+  - the route, with expandable parts and "coming soon" marked;
+  - the capstone in layers, the app features, centres, an FAQ and a final call to action.
+    It makes no income or job guarantees, and has no testimonials until real ones exist.
+- SEO:
+  - metadata, canonical link and Open Graph/Twitter cards;
+  - a generated 1200×630 share image (`/opengraph-image`);
+  - JSON-LD `Course` and `FAQPage`;
+  - `sitemap.xml` (public pages only) and `robots.txt`.
+
+#### Changed
+
+- The learner dashboard moved from `/` to `/home`. Signed-in visitors to `/` go straight there,
+  and the installed app starts there. The app's tab bar is hidden on the landing page.
+- The share image and the title read the brand name from tenant config.
+
+#### Tests
+
+- E2E:
+  - the title, description, canonical link, social cards and structured data;
+  - a single h1, the real counts, and no guarantee language;
+  - the calls to action and the expanding route;
+  - axe in light and dark with reduced motion, and no sideways scroll on phones;
+  - signed-in visitors redirected to `/home`;
+  - the sitemap contains only public pages, robots excludes private ones, and the share image
+    is a PNG.
+
 ### M5b — Commercial model: direct learners, centre licences and seat packs
 
 #### Added

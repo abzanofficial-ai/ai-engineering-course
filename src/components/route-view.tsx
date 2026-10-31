@@ -36,7 +36,7 @@ export function RouteView({ data }: { data: RouteData }) {
       <nav aria-label="Breadcrumb">
         <ol className="crumbs">
           <li>
-            <Link href="/">Home</Link>
+            <Link href="/home">Home</Link>
           </li>
           <li aria-current="page">{data.title}</li>
         </ol>

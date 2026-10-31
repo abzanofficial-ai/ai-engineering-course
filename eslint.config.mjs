@@ -10,6 +10,7 @@ const HTML_RENDERERS = [
   "src/components/term-popover.tsx",
   "src/app/learn/**/page.tsx",
   "src/app/layout.tsx",
+  "src/app/page.tsx", // JSON-LD only, escaped (landing page)
 ];
 
 const config = [

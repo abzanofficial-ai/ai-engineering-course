@@ -99,7 +99,7 @@ test("signed out, the certificates list asks you to sign in; a bad id is 404", a
 
 test("the dashboard links to certificates", async ({ page, isMobile }) => {
   test.skip(isMobile, "the side list shows on wide screens");
-  await signIn(page, newEmail("cert-nav"), "/");
+  await signIn(page, newEmail("cert-nav"), "/home");
   await page
     .getByRole("navigation", { name: "Your learning" })
     .getByRole("link", { name: "Certificates" })

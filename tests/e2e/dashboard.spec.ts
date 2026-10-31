@@ -13,7 +13,7 @@ test("signed out, home lists the course and starts it on its learning path", asy
   page,
   isMobile,
 }) => {
-  await page.goto("/");
+  await page.goto("/home");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your courses");
   const card = page.getByRole("article", { name: "The AI Engineering Handbook" });
   await expect(card.getByText("Beginner → Job Ready")).toBeVisible();
@@ -40,7 +40,7 @@ test("signed in, home shows progress and continues where the learner left off", 
   await expect(page.locator(".save-status:visible")).toHaveText("Saved", { timeout: 10_000 });
 
   await page.getByRole("link", { name: "AI Engineering Handbook" }).first().click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/home$/);
   const card = page.getByRole("article", { name: "The AI Engineering Handbook" });
   await expect(card.getByRole("progressbar")).toBeVisible();
   const activity = page.getByRole("region", { name: "My activity" });
@@ -59,10 +59,10 @@ test("signed in, home shows progress and continues where the learner left off", 
 for (const scheme of ["light", "dark"] as const) {
   test(`home has no WCAG 2.2 AA violations (${scheme})`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme });
-    await page.goto("/");
+    await page.goto("/home");
     await expect(page.getByRole("article")).toBeVisible();
     await noViolations(page);
-    await signIn(page, newEmail(`dash-a11y-${scheme}`), "/");
+    await signIn(page, newEmail(`dash-a11y-${scheme}`), "/home");
     await expect(page.getByRole("region", { name: "My activity" })).toBeVisible();
     await noViolations(page);
   });

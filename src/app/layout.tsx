@@ -23,6 +23,8 @@ const display = Bricolage_Grotesque({
 // Static pages are built before any request, so they carry the default tenant's branding
 // (ADR-0024); per-host branding of static pages is Phase 2.
 export const metadata: Metadata = {
+  // Absolute URLs for canonical links, sitemaps and social cards (set APP_URL at build time).
+  metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
   title: { default: brand.name, template: `%s · ${brand.name}` },
   description: brand.tagline,
   manifest: "/manifest.webmanifest",

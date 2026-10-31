@@ -25,6 +25,10 @@ learner can take, so new courses (and, later, subscribed or purchased ones) appe
   palette (design-system §6). The learner state now carries `week.days[].xp`.
 - The brand link and the installed app's start URL now go to `/`.
 
+- **Revision (2026-10-31):** `/` is now the public landing page (design-system §6.4). The
+  dashboard moved to `/home`; the proxy sends signed-in visitors from `/` to `/home`, and the
+  installed app starts at `/home`.
+
 ## Later
 
 - **M5 (entitlements):** cards are filtered to courses the learner is entitled to, with locked

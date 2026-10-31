@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Join with a code" };
 export default function JoinPage() {
   return (
     <main id="main" className="wrap panel-wrap" style={{ maxWidth: "36rem" }}>
-      <Link className="back" href="/">
+      <Link className="back" href="/home">
         <Icon name="back" /> Home
       </Link>
       <h1 style={{ margin: 0, fontSize: "2rem" }}>Join with a code</h1>

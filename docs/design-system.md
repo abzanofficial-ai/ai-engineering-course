@@ -310,3 +310,26 @@ navigation as a scrolling row.
 - **Course page:** a breadcrumb, "Home › course title".
 - The dashboard's side list shows only on wide screens (≥ 1100px), where it adds Glossary and
   Certificates.
+
+### 6.4 Landing page (`/`)
+
+Public, static and crawlable. It is built only from facts in the course: counts come from the
+manifest, part outcomes from the Index, and the promises from "How to use this book". It makes
+no earnings or job guarantees and shows no testimonials until real ones exist (advertising rules
+on earnings claims and fake reviews).
+
+- **Hero:** the promise, two calls to action (Chapter 1, which needs no account, and the route),
+  and the fifteen parts drawn as a ring with the milestone parts larger. Followed by the real
+  counts.
+- **Sections:** four finish lines (hired, freelance, own product, lead the decisions), the
+  three promises, the four chapter modes, the route (expandable parts with "coming soon"
+  marked honestly), the capstone in layers, the app features, centres, FAQ and a final call to
+  action.
+- **SEO:**
+  - title, description and canonical link;
+  - Open Graph and Twitter cards with a generated 1200×630 image;
+  - JSON-LD `Course` (syllabus = the 15 parts) and `FAQPage`;
+  - `sitemap.xml` with public pages only, and `robots.txt` excluding personal and admin pages.
+- **Absolute URLs** come from `APP_URL` at build time, so set it to the real domain before
+  `pnpm build`.
+- **Signed-in learners** visiting `/` go straight to `/home`.

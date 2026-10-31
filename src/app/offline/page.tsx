@@ -11,7 +11,7 @@ export default function Offline() {
         This page hasn&apos;t been saved on this device yet. Chapters you have opened before still
         work offline, and anything you tick or write is saved and synced when you reconnect.
       </p>
-      <Link className="btn" href="/">
+      <Link className="btn" href="/home">
         Back to your route
       </Link>
     </main>

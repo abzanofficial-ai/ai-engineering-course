@@ -11,7 +11,7 @@ type Item = { href: string; label: string; icon: IconName; match: (path: string)
 function items(course: string): Item[] {
   const learn = `/learn/${course}`;
   return [
-    { href: "/", label: "Home", icon: "courses", match: (p) => p === "/" },
+    { href: "/home", label: "Home", icon: "courses", match: (p) => p === "/home" },
     {
       href: learn,
       label: "Course",
@@ -50,6 +50,7 @@ function NavLinks({ course, className }: { course: string; className: string }) 
 
 /** In the header on tablets and computers. */
 export function HeaderNav({ course }: { course: string }) {
+  if (usePathname() === "/") return null; // the landing page has its own calls to action
   return (
     <nav className="header-nav" aria-label="Main">
       <NavLinks course={course} className="header-nav-list" />
@@ -59,6 +60,7 @@ export function HeaderNav({ course }: { course: string }) {
 
 /** Fixed to the bottom of the screen on phones. */
 export function TabBar({ course }: { course: string }) {
+  if (usePathname() === "/") return null;
   return (
     <nav className="tab-bar" aria-label="Main (bottom)">
       <NavLinks course={course} className="tab-bar-list" />

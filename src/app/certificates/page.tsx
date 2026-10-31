@@ -14,7 +14,7 @@ export default function CertificatesRoute() {
   return (
     <main id="main">
       <div className="wrap panel-wrap">
-        <Link className="back" href="/">
+        <Link className="back" href="/home">
           <Icon name="back" /> Home
         </Link>
         <h1 style={{ margin: 0, fontSize: "2rem" }}>Certificates</h1>

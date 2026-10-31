@@ -16,7 +16,7 @@ export default function PlansPage() {
   const tiers = plans.seatPack.tiers;
   return (
     <main id="main" className="wrap panel-wrap plans">
-      <Link className="back" href="/">
+      <Link className="back" href="/home">
         <Icon name="back" /> Home
       </Link>
       <h1 style={{ margin: 0, fontSize: "2rem" }}>Plans</h1>

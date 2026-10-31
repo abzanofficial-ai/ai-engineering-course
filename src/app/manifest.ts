@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: brand.name,
     short_name: brand.shortName,
     description: brand.tagline,
-    start_url: "/",
+    start_url: "/home",
     scope: "/",
     display: "standalone",
     background_color: brand.colors.themeLight,

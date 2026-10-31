@@ -91,6 +91,12 @@ DATABASE_URL=postgres://lms:lms_local_only@localhost:5432/lms_e2e pnpm db:migrat
 See [`.env.example`](.env.example). Every external service (Resend, Google OAuth, Sentry,
 Cloudflare, Stripe) is a placeholder: the app runs locally without any of them.
 
+## Deploying: set APP_URL before building
+
+Canonical links, the sitemap, `robots.txt` and social cards use absolute URLs from `APP_URL` at
+build time. Set it to the real address (for example `https://learn.example.com`) before
+`pnpm build`.
+
 ## Admin
 
 Platform owners are the emails in `ADMIN_EMAILS` (comma-separated, set before they first sign

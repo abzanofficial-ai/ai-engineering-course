@@ -18,7 +18,7 @@ test("Home and Course are reachable from a chapter", async ({ page, isMobile }) 
   await expect(nav.getByRole("link", { name: "Course" })).toHaveAttribute("aria-current", "page");
 
   await nav.getByRole("link", { name: "Home" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/home$/);
   await expect(nav.getByRole("link", { name: "Home" })).toHaveAttribute("aria-current", "page");
 
   await nav.getByRole("link", { name: "Course" }).click();
@@ -27,7 +27,7 @@ test("Home and Course are reachable from a chapter", async ({ page, isMobile }) 
     .getByRole("navigation", { name: "Breadcrumb" })
     .getByRole("link", { name: "Home" })
     .click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/home$/);
 });
 
 test("the bottom bar never covers the end of the page on phones", async ({ page, isMobile }) => {
