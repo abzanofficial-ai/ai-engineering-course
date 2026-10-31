@@ -41,6 +41,8 @@ for (const course of courses) {
   writeJson(path.join(dir, "glossary.json"), build.glossary);
   writeJson(path.join(dir, "cards.json"), build.cards);
   writeJson(path.join(dir, "diagrams.json"), build.diagrams);
+  // Diagram sizes, so the admin preview builds a file exactly as this build did (ADR-0006).
+  writeJson(path.join(dir, "renders.json"), renders);
   writeJson(path.join(dir, "search.json"), build.search);
   const labels = new Map(build.manifest.pages.map((p) => [p.key, p.label]));
   for (const r of build.search)
@@ -62,15 +64,15 @@ const registry =
   courses
     .map(
       (c, i) =>
-        `import m${i} from "./${c.slug}/manifest.json";\nimport g${i} from "./${c.slug}/glossary.json";\nimport c${i} from "./${c.slug}/cards.json";`,
+        `import m${i} from "./${c.slug}/manifest.json";\nimport g${i} from "./${c.slug}/glossary.json";\nimport c${i} from "./${c.slug}/cards.json";\nimport r${i} from "./${c.slug}/renders.json";`,
     )
     .join("\n") +
-  `\nimport type { CourseManifest, GlossaryEntry, Card } from "../src/content/types";\n` +
-  `export const generated: Record<string, { manifest: CourseManifest; glossary: GlossaryEntry[]; cards: Card[] }> = {\n` +
+  `\nimport type { CourseManifest, GlossaryEntry, Card, DiagramRenders } from "../src/content/types";\n` +
+  `export const generated: Record<string, { manifest: CourseManifest; glossary: GlossaryEntry[]; cards: Card[]; renders: DiagramRenders }> = {\n` +
   courses
     .map(
       (c, i) =>
-        `  ${JSON.stringify(c.slug)}: { manifest: m${i} as unknown as CourseManifest, glossary: g${i} as unknown as GlossaryEntry[], cards: c${i} as unknown as Card[] },`,
+        `  ${JSON.stringify(c.slug)}: { manifest: m${i} as unknown as CourseManifest, glossary: g${i} as unknown as GlossaryEntry[], cards: c${i} as unknown as Card[], renders: r${i} as DiagramRenders },`,
     )
     .join("\n") +
   `\n};\n`;

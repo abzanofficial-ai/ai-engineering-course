@@ -22,11 +22,23 @@ const schema = z.object({
   SENTRY_DSN: z.string().optional(),
   /** Comma-separated emails that get the admin role on sign-up (no UI to self-promote). */
   ADMIN_EMAILS: z.string().default(""),
+  /** Publishing from the admin screen (ADR-0006): a fine-grained token with contents:write. */
+  GITHUB_PUBLISH_TOKEN: z.string().optional(),
+  GITHUB_REPOSITORY: z
+    .string()
+    .regex(/^[\w.-]+\/[\w.-]+$/)
+    .optional(),
+  GITHUB_PUBLISH_BRANCH: z.string().default("main"),
 });
 
 export type Env = z.infer<typeof schema>;
 
 let cached: Env | null = null;
+
+/** Tests only: re-read process.env on the next call (settings are otherwise read once). */
+export function resetEnvForTests(): void {
+  cached = null;
+}
 
 export function env(): Env {
   if (cached) return cached;

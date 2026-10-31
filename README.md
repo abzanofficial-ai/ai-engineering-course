@@ -100,5 +100,7 @@ build time. Set it to the real address (for example `https://learn.example.com`)
 ## Admin
 
 Platform owners are the emails in `ADMIN_EMAILS` (comma-separated, set before they first sign
-in). They see `/admin/commerce`: seat packs and join codes, manual access, and centre licences
+in). They see `/admin/content`, which previews a new handbook export and publishes it as a commit
+(set `GITHUB_PUBLISH_TOKEN` and `GITHUB_REPOSITORY`; without them the screen shows the CLI
+steps), and `/admin/commerce`: seat packs and join codes, manual access, and centre licences
 with monthly usage (ADR-0030). Prices and offers live in `content/plans.json`.

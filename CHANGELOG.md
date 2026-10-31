@@ -4,6 +4,40 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### M5c: Content import from the admin screen
+
+#### Added
+
+- `/admin/content`: upload a new handbook export and see exactly what would change:
+  - new, removed or newly published pages, and address changes;
+  - edited sections, and lab steps or questions added or removed;
+  - import warnings.
+- Content that learners have progress on can't disappear without the owner confirming it.
+- Publish commits the file to GitHub, which triggers the CI rebuild. Only the exact previewed
+  file can be published. Without a token, the screen shows the command-line steps.
+- An admin menu links Content and Access and centres.
+- The build saves diagram sizes (`renders.json`), so the preview matches the live build exactly.
+
+#### Fixed
+
+- The first version of the preview reported every chapter with a diagram as edited, because
+  the preview built without the live diagram sizes. Caught by the new end-to-end test.
+- A timing race in the account-deletion end-to-end test: it now checks the confirmation instead
+  of a URL that the page tidies away.
+
+#### Tests
+
+- Unit: GitHub publishing (sha, branch and base64 content; creating a new file; GitHub's
+  refusal reason) with a fake fetch.
+- Integration:
+  - owner-only access, and the admin-route guard extended;
+  - the preview of an edited real handbook shows only Chapter 1, with its two sections;
+  - a tampered file and missing consent are refused;
+  - the instructions shown without a token;
+  - a commit through a stubbed GitHub API.
+- E2E: upload, preview, the consent checkbox, the publish instructions, the admin menu, axe;
+  learners get a 404.
+
 ### Plum palette across the app
 
 #### Changed

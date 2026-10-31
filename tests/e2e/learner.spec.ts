@@ -82,7 +82,13 @@ test("account: rename, export, sign out, delete", async ({ page }) => {
   await expect(del).toBeDisabled();
   await page.getByLabel("Type your email address to confirm").fill(email);
   await del.click();
-  await expect(page).toHaveURL(/deleted=1|learn/);
+  // The dashboard confirms the deletion once, then tidies "?deleted=1" out of the address.
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "Your account and all your learning data have been deleted." }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/home(\?deleted=1)?$/);
   expect((await page.request.get("/api/me/state?course=ai-engineering-handbook")).status()).toBe(
     401,
   );
