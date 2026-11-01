@@ -337,28 +337,6 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="lp-section" aria-labelledby="goals-h">
-        <div className="lp-wrap">
-          <p className="lp-kicker">Choose your finish line</p>
-          <h2 id="goals-h">One course. Four ways to win.</h2>
-          <p className="lp-sub">
-            Everyone starts at the same place: zero. Where you finish is up to you.
-          </p>
-          <div className="lp-goals">
-            {GOALS.map((g) => (
-              <article key={g.title} className="lp-card lp-goal">
-                <span className="lp-icon" aria-hidden="true">
-                  <Icon name={g.icon} />
-                </span>
-                <h3>{g.title}</h3>
-                <p>{g.text}</p>
-                <p className="lp-when">{g.when}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="lp-section lp-founders" aria-labelledby="founders-h">
         <div className="lp-wrap">
           <p className="lp-kicker">For founders</p>
@@ -385,6 +363,28 @@ export default function Landing() {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      <section className="lp-section" aria-labelledby="goals-h">
+        <div className="lp-wrap">
+          <p className="lp-kicker">Choose your finish line</p>
+          <h2 id="goals-h">One course. Four ways to win.</h2>
+          <p className="lp-sub">
+            Everyone starts at the same place: zero. Where you finish is up to you.
+          </p>
+          <div className="lp-goals">
+            {GOALS.map((g) => (
+              <article key={g.title} className="lp-card lp-goal">
+                <span className="lp-icon" aria-hidden="true">
+                  <Icon name={g.icon} />
+                </span>
+                <h3>{g.title}</h3>
+                <p>{g.text}</p>
+                <p className="lp-when">{g.when}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
