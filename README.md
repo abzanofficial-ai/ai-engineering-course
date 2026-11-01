@@ -7,6 +7,7 @@ tracks progress and adds interactivity around it.
 - Architecture: [`docs/architecture.md`](docs/architecture.md) · decisions: [`docs/adr/`](docs/adr/)
 - Test strategy: [`docs/test-strategy.md`](docs/test-strategy.md) · design system: [`docs/design-system.md`](docs/design-system.md)
 - Changes: [`CHANGELOG.md`](CHANGELOG.md)
+- Contributing and branches (work branch → `develop` → `main`): [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 ## Run it locally (about 10 minutes)
 
