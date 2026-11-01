@@ -1,0 +1,12 @@
+{
+  "courses": [
+    {
+      "slug": "ai-engineering-handbook",
+      "source": "content/handbook.md",
+      "product": "course-ai-engineering-handbook",
+      "level": "Beginner → Job Ready",
+      "summary": "Who it's for: AI engineers, forward-deployed engineers, solutions architects, developers moving into AI, and freelancers selling AI builds to businesses.",
+      "icon": "route"
+    }
+  ]
+}

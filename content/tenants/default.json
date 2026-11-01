@@ -1,0 +1,35 @@
+{
+  "name": "The AI Engineering Handbook",
+  "shortName": "AI Handbook",
+  "headerName": "AI Engineering Handbook",
+  "tagline": "A practical route from beginner to job-ready AI engineer.",
+  "homeIntro": "A practical route from beginner to job-ready AI engineer. Read, build, decide and explain, one chapter at a time.",
+  "defaultCourse": "ai-engineering-handbook",
+  "logo": {
+    "icon192": "/icons/icon-192.png",
+    "icon512": "/icons/icon-512.png",
+    "maskable512": "/icons/maskable-512.png",
+    "appleTouch": "/icons/apple-touch-icon.png"
+  },
+  "colors": {
+    "mark": ["hsl(30 90% 70%)", "hsl(340 70% 72%)", "hsl(270 75% 78%)", "hsl(320 60% 60%)"],
+    "themeLight": "#fbf3f6",
+    "themeDark": "#1a0f1f"
+  },
+  "email": {
+    "fromName": "AI Engineering Handbook",
+    "fromAddress": "no-reply@example.com"
+  },
+  "supportEmail": "support@example.com",
+  "footer": "The AI Engineering Handbook",
+  "certificate": {
+    "title": "Certificate of completion",
+    "body": "has completed {scope} of The AI Engineering Handbook, a practical course that takes learners from beginner to job-ready AI engineer.",
+    "signatory": "The AI Engineering Handbook"
+  },
+  "access": {
+    "publicPages": ["start-*", "ch-1"],
+    "freeTier": ["start-*", "part:1"],
+    "launchOpenToAllSignedIn": true
+  }
+}

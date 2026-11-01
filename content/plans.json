@@ -1,0 +1,39 @@
+{
+  "currency": "GBP",
+  "note": "Placeholder prices until tested with real centres (ADR-0030). Amounts are in pence.",
+  "direct": [
+    {
+      "code": "direct-monthly",
+      "label": "Monthly",
+      "kind": "subscription",
+      "interval": "month",
+      "pricePence": 1500
+    },
+    {
+      "code": "direct-annual",
+      "label": "Annual",
+      "kind": "subscription",
+      "interval": "year",
+      "pricePence": 12900
+    },
+    { "code": "direct-lifetime", "label": "Lifetime", "kind": "one_off", "pricePence": 19900 }
+  ],
+  "centreLicence": {
+    "code": "centre-licence",
+    "label": "Centre licence",
+    "basePence": 30000,
+    "includedLearners": 30,
+    "extraLearnerPence": 600,
+    "setupPence": 0
+  },
+  "seatPack": {
+    "code": "seat-pack",
+    "label": "Seat pack",
+    "accessMonths": 12,
+    "tiers": [
+      { "minSeats": 1, "pencePerSeat": 6000 },
+      { "minSeats": 50, "pencePerSeat": 5000 },
+      { "minSeats": 200, "pencePerSeat": 4000 }
+    ]
+  }
+}
