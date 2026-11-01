@@ -39,6 +39,8 @@ export const metadata: Metadata = {
     "AI agents course",
     "AI engineer interview preparation",
     "freelance AI developer",
+    "build an AI startup",
+    "AI course for non-technical founders",
   ],
   openGraph: {
     type: "website",
@@ -129,6 +131,31 @@ const GOALS = [
     title: "Lead the decisions",
     text: "Every chapter ends with where the judgment is: what you can hand to an AI, and what you must be able to decide yourself. That is what separates senior engineers.",
     when: "In every chapter",
+  },
+] as const;
+
+// Idea → product → paying customers, mapped to the parts that teach each step (Index outcomes).
+const FOUNDER_STEPS = [
+  {
+    step: "Idea",
+    title: "Prove it works",
+    text: "Learn enough Python, APIs and prompting to build a working AI feature yourself, without waiting for a developer.",
+    parts: "Parts 1 to 6",
+    soon: false,
+  },
+  {
+    step: "Product",
+    title: "Build something people pay for",
+    text: "Answer questions from a business's own documents, take real actions safely, and ship a full product with a real interface.",
+    parts: "Parts 8 to 10",
+    soon: false,
+  },
+  {
+    step: "Paying customers",
+    title: "Run it and sell it",
+    text: "Keep it reliable and its costs under control, then find clients, price your work and run it as a SaaS.",
+    parts: "Parts 11 to 15",
+    soon: true,
   },
 ] as const;
 
@@ -329,6 +356,35 @@ export default function Landing() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="lp-section lp-founders" aria-labelledby="founders-h">
+        <div className="lp-wrap">
+          <p className="lp-kicker">For founders</p>
+          <h2 id="founders-h" className="lp-founders-title">
+            From Idea to Customers: <span className="lp-grad">Building your Startup with AI</span>
+          </h2>
+          <p className="lp-founders-sub">
+            For non-technical founders who want to go from idea → product → paying customers
+          </p>
+          <p className="lp-sub">
+            You don&apos;t need a technical co-founder to start. The course takes you from zero to
+            building the product yourself, in plain English, one chapter at a time.
+          </p>
+          <ol className="lp-founder-steps">
+            {FOUNDER_STEPS.map((f) => (
+              <li key={f.step} className="lp-card">
+                <span className="lp-founder-step">{f.step}</span>
+                <h3>{f.title}</h3>
+                <p>{f.text}</p>
+                <p className="lp-when">
+                  {f.parts}
+                  {f.soon && <span className="lp-badge lp-badge-soon">Coming soon</span>}
+                </p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 

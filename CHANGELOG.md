@@ -55,6 +55,11 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 #### Added
 
+- A founders section with the owner's tagline, "From Idea to Customers: Building your Startup
+  with AI" and "For non-technical founders who want to go from idea → product → paying
+  customers". The three steps map to the parts that teach them, and the unwritten ones are
+  marked "coming soon".
+
 - Motion and lazy rendering on the landing page, all CSS. It works without JavaScript and is
   switched off entirely with "reduce motion":
   - the fifteen parts orbit slowly and stay upright, and the dashed track turns;

@@ -29,6 +29,15 @@ test("the landing page is ready for search engines and social sharing", async ({
   await expect(page.getByText("Hands-on lab steps")).toBeVisible();
   await expect(page.locator(".lp-stats")).toContainText("231");
   await expect(page.locator("#route")).toContainText("29 of 47 chapters are ready today");
+  // The owner's founder tagline, with the unwritten steps marked honestly.
+  const founders = page.getByRole("region", { name: /From Idea to Customers/ });
+  await expect(founders.getByRole("heading", { level: 2 })).toHaveText(
+    "From Idea to Customers: Building your Startup with AI",
+  );
+  await expect(founders).toContainText(
+    "For non-technical founders who want to go from idea → product → paying customers",
+  );
+  await expect(founders.locator(".lp-badge-soon")).toHaveCount(1);
   // No promises the course can't keep.
   await expect(page.locator("main")).not.toContainText(/guarantee|\$200,000|200k/i);
 });
