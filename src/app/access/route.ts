@@ -2,6 +2,7 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse } from "next/server";
 import { PASS_COOKIE, PASS_SECONDS, signPass } from "@/lib/access-pass";
 import { listCourses } from "@/lib/content";
+import { safeNext } from "@/lib/safe-next";
 import { requireContext } from "@/server/context";
 import { authSecret } from "@/server/env";
 import { loadAccess, pageAccess } from "@/server/repo/commerce";
@@ -12,8 +13,7 @@ import { loadAccess, pageAccess } from "@/server/repo/commerce";
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const raw = url.searchParams.get("next") ?? "/";
-  const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+  const next = safeNext(url.searchParams.get("next"));
   try {
     const { ctx } = await requireContext(req, "own:progress");
     const courses: string[] = [];

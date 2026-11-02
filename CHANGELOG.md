@@ -4,6 +4,12 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Security
+
+- Fixed an open redirect in `/access` and `/sign-in`: `next` values like `/\evil.example` or
+  `/<tab>/evil.example` passed the old prefix check. Destinations are now resolved like a
+  browser would and must stay on the same site (`src/lib/safe-next.ts`), with regression tests.
+
 ### Process
 
 - Branching: work branch → `develop` → `main` (`CONTRIBUTING.md`). CI also runs on pushes to
