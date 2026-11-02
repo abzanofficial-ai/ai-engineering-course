@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { defaultBranding as brand } from "@/lib/branding";
-import { money, plans, seatPackPrice } from "@/lib/plans";
+import { money, plans, seatPackPrice, yearlySaving } from "@/lib/plans";
 
 export const metadata: Metadata = { title: "Plans" };
 
@@ -14,6 +14,7 @@ const per = (interval?: string) =>
 export default function PlansPage() {
   const l = plans.centreLicence;
   const tiers = plans.seatPack.tiers;
+  const saving = yearlySaving();
   return (
     <main id="main" className="wrap panel-wrap plans">
       <Link className="back" href="/home">
@@ -31,7 +32,12 @@ export default function PlansPage() {
         <h2 id="learners-h">For learners</h2>
         <div className="plan-grid">
           {plans.direct.map((p) => (
-            <article key={p.code} className="plan-card" aria-labelledby={`plan-${p.code}`}>
+            <article
+              key={p.code}
+              className={p.highlight ? "plan-card plan-best" : "plan-card"}
+              aria-labelledby={`plan-${p.code}`}
+            >
+              {p.badge && <span className="plan-badge">{p.badge}</span>}
               <h3 id={`plan-${p.code}`}>{p.label}</h3>
               <p className="plan-price">
                 <b>{money(p.pricePence)}</b> <span>{per(p.interval)}</span>
@@ -41,6 +47,11 @@ export default function PlansPage() {
                   ? "Pay once, keep access to the course and its updates."
                   : `Full course access, cancel any time.`}
               </p>
+              {p.interval === "year" && saving && (
+                <p className="plan-save">
+                  Save {saving}% · just {money(Math.round(p.pricePence / 12))} a month
+                </p>
+              )}
               <span className="plan-soon">Checkout opens soon</span>
             </article>
           ))}

@@ -1,22 +1,23 @@
 {
   "currency": "GBP",
-  "note": "Placeholder prices until tested with real centres (ADR-0030). Amounts are in pence.",
+  "note": "Launch prices (founding member annual). Centre prices are placeholders until tested with real centres (ADR-0030). Amounts are in pence.",
   "direct": [
     {
       "code": "direct-monthly",
       "label": "Monthly",
       "kind": "subscription",
       "interval": "month",
-      "pricePence": 1500
+      "pricePence": 599
     },
     {
       "code": "direct-annual",
       "label": "Annual",
       "kind": "subscription",
       "interval": "year",
-      "pricePence": 12900
-    },
-    { "code": "direct-lifetime", "label": "Lifetime", "kind": "one_off", "pricePence": 19900 }
+      "pricePence": 2400,
+      "badge": "Founding member price",
+      "highlight": true
+    }
   ],
   "centreLicence": {
     "code": "centre-licence",
@@ -31,9 +32,18 @@
     "label": "Seat pack",
     "accessMonths": 12,
     "tiers": [
-      { "minSeats": 1, "pencePerSeat": 6000 },
-      { "minSeats": 50, "pencePerSeat": 5000 },
-      { "minSeats": 200, "pencePerSeat": 4000 }
+      {
+        "minSeats": 1,
+        "pencePerSeat": 6000
+      },
+      {
+        "minSeats": 50,
+        "pencePerSeat": 5000
+      },
+      {
+        "minSeats": 200,
+        "pencePerSeat": 4000
+      }
     ]
   }
 }
