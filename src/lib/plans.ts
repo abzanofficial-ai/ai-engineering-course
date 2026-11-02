@@ -15,6 +15,10 @@ const schema = z.object({
         kind: z.enum(["subscription", "one_off"]),
         interval: z.enum(["month", "year"]).optional(),
         pricePence: pence,
+        /** Short label shown on the card, e.g. a launch price. */
+        badge: z.string().optional(),
+        /** The plan to steer learners to. */
+        highlight: z.boolean().optional(),
       }),
     )
     .min(1),
@@ -42,6 +46,15 @@ export const plans: Plans = schema.parse(file);
 
 export const money = (p: number) =>
   `£${(p / 100).toLocaleString("en-GB", { minimumFractionDigits: p % 100 ? 2 : 0, maximumFractionDigits: 2 })}`;
+
+/** How much a yearly plan saves against twelve months of the monthly plan, in whole percent. */
+export function yearlySaving(direct: Plans["direct"] = plans.direct): number | null {
+  const month = direct.find((p) => p.kind === "subscription" && p.interval === "month");
+  const year = direct.find((p) => p.kind === "subscription" && p.interval === "year");
+  if (!month || !year || month.pricePence === 0) return null;
+  const pct = Math.floor((1 - year.pricePence / (month.pricePence * 12)) * 100);
+  return pct > 0 ? pct : null;
+}
 
 /** A centre licence's monthly invoice for a number of active learners. */
 export function licenceInvoice(

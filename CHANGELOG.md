@@ -4,6 +4,12 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Pricing
+
+- Learner plans are now £5.99 a month and £24 a year (founding member price, highlighted, with
+  the yearly saving shown). The lifetime plan is removed for now; it can be added back in
+  `content/plans.json`. Centre licence and seat pack prices are unchanged.
+
 ### Security
 
 - Fixed an open redirect in `/access` and `/sign-in`: `next` values like `/\evil.example` or

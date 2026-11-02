@@ -2704,6 +2704,25 @@ body {
   display: grid;
   gap: 4px;
 }
+.plan-best {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    var(--shadow);
+}
+.plan-badge {
+  justify-self: start;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--btn-grad, var(--accent));
+  color: var(--bg);
+}
+.plan-save {
+  font-weight: 600;
+  color: var(--accent);
+}
 .plan-soon {
   justify-self: start;
   font-size: 13px;

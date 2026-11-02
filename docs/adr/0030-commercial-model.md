@@ -16,7 +16,10 @@ recommended model now and change the numbers when the first centres give feedbac
 Three offers, all priced in `content/plans.json` (editable without code). The prices there
 are **placeholders until tested with real centres**.
 
-1. **Direct** — individual learners: monthly, annual or one-off lifetime access to a course.
+1. **Direct** — individual learners: monthly or annual access to a course (one-off plans are
+   still supported by the schema). Launch prices (2026-11-02): £5.99 a month and £24 a year as
+   a founding-member price, so most learners pick annual (fewer cancellations, lower fee share).
+   A plan can carry a `badge` and `highlight`; the plans page shows the yearly saving.
    Grants an `entitlement` (source `direct`) when payment is confirmed (Phase 4 webhook).
 2. **Centre licence (white-label)** — a centre's own tenant (ADR-0023). Monthly base fee that
    includes a number of **active learners**, plus a fee per extra active learner, and an
