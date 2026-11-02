@@ -110,13 +110,13 @@ describe("with launch mode off", () => {
     expect(await verifyPass(authSecret(), session, pass)).toMatchObject({ courses: [COURSE] });
     expect(await verifyPass(authSecret(), "someone-else", pass)).toBeNull();
 
-    // Open redirects are refused.
-    const evil = await accessPage.GET(
-      req(`/access?next=${encodeURIComponent("//evil.example")}`, a),
-    );
-    expect(new URL(evil.headers.get("location")!).host).toBe(
-      new URL(granted.headers.get("location")!).host,
-    );
+    // Open redirects are refused, including backslash and tab tricks browsers treat as "//".
+    for (const bad of ["//evil.example", "/\\evil.example", "/\t/evil.example"]) {
+      const evil = await accessPage.GET(req(`/access?next=${encodeURIComponent(bad)}`, a));
+      expect(new URL(evil.headers.get("location")!).host).toBe(
+        new URL(granted.headers.get("location")!).host,
+      );
+    }
   });
 
   it("signed out, /access goes to sign-in and the APIs refuse", async () => {
