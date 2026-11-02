@@ -4,6 +4,11 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Process
+
+- Branching: work branch → `develop` → `main` (`CONTRIBUTING.md`). CI also runs on pushes to
+  `develop`, and deploys stay on `main` only.
+
 ### M5c: Content import from the admin screen
 
 #### Added
