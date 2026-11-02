@@ -4,12 +4,16 @@ import { newEmail, signIn } from "./helpers";
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
-test("the plans page shows the three offers from the price list", async ({ page }) => {
+test("the plans page shows the offers from the price list", async ({ page }) => {
   await page.goto("/plans");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Plans");
   await expect(page.getByText("every signed-in learner gets the full course free")).toBeVisible();
-  for (const name of ["Monthly", "Annual", "Lifetime", "Centre licence", "Seat pack"])
+  for (const name of ["Monthly", "Annual", "Centre licence", "Seat pack"])
     await expect(page.getByRole("heading", { level: 3, name })).toBeVisible();
+  await expect(page.getByText("£5.99")).toBeVisible();
+  await expect(page.getByText("£24", { exact: true })).toBeVisible();
+  await expect(page.getByText("Founding member price")).toBeVisible();
+  await expect(page.getByText("Save 66% · just £2 a month")).toBeVisible();
   await expect(page.getByText("Includes 30 active learners a month")).toBeVisible();
   await expect(page.getByRole("link", { name: "enter it here" })).toHaveAttribute("href", "/join");
   const axe = await new AxeBuilder({ page }).withTags(TAGS).analyze();

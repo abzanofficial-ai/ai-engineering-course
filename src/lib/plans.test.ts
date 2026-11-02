@@ -1,16 +1,36 @@
 import { describe, expect, it } from "vitest";
 import { hashJoinCode, newJoinCode, normaliseJoinCode } from "@/server/join-code";
-import { decideAccess, isFreeTierPage, licenceInvoice, money, plans, seatPackPrice } from "./plans";
+import {
+  decideAccess,
+  isFreeTierPage,
+  licenceInvoice,
+  money,
+  plans,
+  seatPackPrice,
+  yearlySaving,
+} from "./plans";
 
 describe("price list", () => {
   it("loads and validates content/plans.json", () => {
-    expect(plans.direct.map((p) => p.code)).toEqual([
-      "direct-monthly",
-      "direct-annual",
-      "direct-lifetime",
-    ]);
+    expect(plans.direct.map((p) => p.code)).toEqual(["direct-monthly", "direct-annual"]);
     expect(money(1500)).toBe("£15");
+    expect(money(599)).toBe("£5.99");
     expect(money(12950)).toBe("£129.50");
+  });
+
+  it("yearly saving compares the annual plan with twelve monthly payments", () => {
+    const sub = (interval: "month" | "year", pricePence: number) => ({
+      code: interval,
+      label: interval,
+      kind: "subscription" as const,
+      interval,
+      pricePence,
+    });
+    expect(yearlySaving([sub("month", 599), sub("year", 2400)])).toBe(66);
+    expect(yearlySaving([sub("month", 1000), sub("year", 12000)])).toBeNull();
+    expect(yearlySaving([sub("month", 1000), sub("year", 15000)])).toBeNull();
+    expect(yearlySaving([sub("year", 2400)])).toBeNull();
+    expect(yearlySaving()).toBe(66);
   });
 
   it("centre licence: base fee covers the included learners, then a fee per extra learner", () => {
