@@ -11,6 +11,7 @@ import * as accountRepo from "@/server/repo/account";
 import * as certificateRepo from "@/server/repo/certificate";
 import * as checkpointRepo from "@/server/repo/checkpoint";
 import * as commerceRepo from "@/server/repo/commerce";
+import * as flagsRepo from "@/server/repo/flags";
 import * as progressRepo from "@/server/repo/progress";
 import * as stateRepo from "@/server/repo/state";
 import * as tenantRepo from "@/server/repo/tenant";
@@ -72,6 +73,8 @@ describe("tenant isolation", () => {
       "setTenantLicence",
       "licenceUsage",
       "listTenants",
+      "listFlags",
+      "setFlag",
     ];
     // Public by design: looks up one certificate by its unguessable id (ADR-0029).
     const PUBLIC = ["verifyCertificate"];
@@ -89,12 +92,15 @@ describe("tenant isolation", () => {
       "DEFAULT_TENANT_ID",
       "newCertificateId",
       "pageAccess",
+      "flagsFor",
+      "clearFlagCache",
     ];
     const exported = [
       accountRepo,
       certificateRepo,
       checkpointRepo,
       commerceRepo,
+      flagsRepo,
       progressRepo,
       stateRepo,
       tenantRepo,

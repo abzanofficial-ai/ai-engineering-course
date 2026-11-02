@@ -10,6 +10,7 @@ import type { Ctx } from "../context";
 import { db } from "../db/client";
 import { activityDay, entitlement, membership, seatPack, tenantLicence, user } from "../db/schema";
 import { hashJoinCode, newJoinCode, normaliseJoinCode } from "../join-code";
+import { flagsFor } from "./flags";
 import { getTenant } from "./tenant";
 
 /** Everything the access rule needs for one learner and course, loaded once per request. */
@@ -35,7 +36,8 @@ export async function loadAccess(
   now = new Date(),
 ): Promise<AccessContext> {
   const brand = brandingFor((await getTenant(ctx.tenantId)).config);
-  const [[lic], [mem], [ent]] = await Promise.all([
+  const [flags, [lic], [mem], [ent]] = await Promise.all([
+    flagsFor(ctx.tenantId),
     db()
       .select({
         status: tenantLicence.status,
@@ -61,7 +63,7 @@ export async function loadAccess(
       ),
   ]);
   return {
-    launchOpen: brand.access.launchOpenToAllSignedIn,
+    launchOpen: flags.launch_open_access,
     licenceActive: Boolean(
       lic && lic.status === "active" && lic.startsAt <= now && (!lic.endsAt || lic.endsAt > now),
     ),

@@ -4,6 +4,15 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### M5d: Feature flags
+
+- Feature flags per tenant (ADR-0031): declared in `src/lib/flags.ts`, overrides stored in the
+  new `feature_flag` table (migration 0007), cached for 30 seconds.
+- `/admin/flags` for platform owners: turn a flag on or off, or reset it to its default, with a
+  confirmation for risky changes and a record of who changed it.
+- Launch mode is now the flag `launch_open_access`: the access check, the request gate and the
+  plans page follow it, so it can be switched off without a deploy.
+
 ### Pricing
 
 - Learner plans are now £5.99 a month and £24 a year (founding member price, highlighted, with

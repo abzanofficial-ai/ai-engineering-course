@@ -8,6 +8,9 @@ import { needsSession, paidCourse, type CourseAccess } from "@/lib/access";
 import { PASS_COOKIE, verifyPass } from "@/lib/access-pass";
 import { defaultBranding } from "@/lib/branding";
 import { authSecret } from "@/server/env";
+import { log } from "@/server/log";
+import { flagsFor } from "@/server/repo/flags";
+import { DEFAULT_TENANT_ID } from "@/server/repo/tenant";
 
 const courses: CourseAccess[] = coursesFile.courses.map((c) => ({
   slug: c.slug,
@@ -15,6 +18,17 @@ const courses: CourseAccess[] = coursesFile.courses.map((c) => ({
   // Which pages are public is a tenant decision (ADR-0024); per-host tenants arrive in Phase 2.
   publicPages: defaultBranding.access.publicPages,
 }));
+
+/** Launch mode for the default tenant (cached for 30 s). If flags can't be read, paid pages
+ *  stay protected: the pass check below needs no database. */
+async function launchOpen(): Promise<boolean> {
+  try {
+    return (await flagsFor(DEFAULT_TENANT_ID)).launch_open_access;
+  } catch (err) {
+    log.error("flags.read_failed", { where: "proxy", message: (err as Error).message });
+    return false;
+  }
+}
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -27,8 +41,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
   // Paid pages once billing launches (ADR-0030): a short-lived signed pass, issued by /access
-  // after a database check. Off while every signed-in learner has the full course.
-  if (session && !defaultBranding.access.launchOpenToAllSignedIn) {
+  // after a database check. Off while launch mode (a feature flag, ADR-0031) is on.
+  if (session && !(await launchOpen())) {
     const course = paidCourse(pathname, courses, defaultBranding.access.freeTier);
     if (course) {
       const pass = await verifyPass(authSecret(), session, request.cookies.get(PASS_COOKIE)?.value);

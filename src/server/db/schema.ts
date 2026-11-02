@@ -460,3 +460,19 @@ export const rateLimitBucket = pgTable(
   },
   (t) => [primaryKey({ columns: [t.key, t.windowStart] })],
 );
+
+// ---------------------------------------------------------------------------
+// Feature flags (ADR-0031). Only overrides are stored; a missing row means the flag's default.
+
+/** A per-tenant override of a feature flag, with who changed it last (audit). */
+export const featureFlag = pgTable(
+  "feature_flag",
+  {
+    tenantId: tenantRef(),
+    key: text("key").notNull(),
+    enabled: boolean("enabled").notNull(),
+    updatedBy: text("updated_by").references(() => user.id, { onDelete: "set null" }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.tenantId, t.key] })],
+);
