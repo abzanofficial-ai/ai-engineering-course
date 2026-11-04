@@ -3,18 +3,25 @@
 import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import * as analytics from "@/app/api/admin/analytics/route";
 import * as commerce from "@/app/api/admin/commerce/route";
 import * as content from "@/app/api/admin/content/route";
+import * as flags from "@/app/api/admin/flags/route";
 import * as join from "@/app/api/me/join/route";
 import { req, signIn } from "./auth-helpers";
 import { COURSE } from "./helpers";
 
 const HANDLERS: Record<string, Record<string, (r: Request) => Promise<Response>>> = {
+  "admin/analytics/route.ts": analytics as unknown as Record<
+    string,
+    (r: Request) => Promise<Response>
+  >,
   "admin/commerce/route.ts": commerce as unknown as Record<
     string,
     (r: Request) => Promise<Response>
   >,
   "admin/content/route.ts": content as unknown as Record<string, (r: Request) => Promise<Response>>,
+  "admin/flags/route.ts": flags as unknown as Record<string, (r: Request) => Promise<Response>>,
 };
 
 const post = (cookie: string | null, json: unknown) =>

@@ -3,6 +3,7 @@ import { Bricolage_Grotesque } from "next/font/google";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { HeaderNav, TabBar } from "@/components/app-nav";
+import { Attribution } from "@/components/attribution";
 import { AccountPrompt, HeaderStatus } from "@/components/header-status";
 import { Icon } from "@/components/icons";
 import { LearnerProvider } from "@/components/learner/provider";
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="min-h-screen">
         <LearnerProvider course={course}>
+          <Attribution />
           <a href="#main" className="skip-link">
             Skip to content
           </a>

@@ -21,6 +21,7 @@ const PERSONAL_TABLES = {
   entitlements: t.entitlement,
   activityDays: t.activityDay,
   settings: t.userSettings,
+  signupSource: t.signupSource,
 } as const;
 
 export async function exportUserData(ctx: Ctx) {

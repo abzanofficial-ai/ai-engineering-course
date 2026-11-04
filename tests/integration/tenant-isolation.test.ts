@@ -8,9 +8,11 @@ import * as ops from "@/app/api/me/ops/route";
 import { generated } from "@generated/index";
 import { db } from "@/server/db/client";
 import * as accountRepo from "@/server/repo/account";
+import * as analyticsRepo from "@/server/repo/analytics";
 import * as certificateRepo from "@/server/repo/certificate";
 import * as checkpointRepo from "@/server/repo/checkpoint";
 import * as commerceRepo from "@/server/repo/commerce";
+import * as flagsRepo from "@/server/repo/flags";
 import * as progressRepo from "@/server/repo/progress";
 import * as stateRepo from "@/server/repo/state";
 import * as tenantRepo from "@/server/repo/tenant";
@@ -58,6 +60,7 @@ describe("tenant isolation", () => {
       "loadAccess",
       "myAccess",
       "redeemJoinCode",
+      "recordSignupSource",
     ];
     // Platform administration: name their tenant explicitly; callers hold platform:* (ADR-0030).
     const PLATFORM = [
@@ -72,9 +75,13 @@ describe("tenant isolation", () => {
       "setTenantLicence",
       "licenceUsage",
       "listTenants",
+      "listFlags",
+      "setFlag",
+      "analyticsOverview",
     ];
     // Public by design: looks up one certificate by its unguessable id (ADR-0029).
-    const PUBLIC = ["verifyCertificate"];
+    // Anonymous visit counters by source: no person is recorded (ADR-0032).
+    const PUBLIC = ["verifyCertificate", "recordVisit"];
     const IDENTITY = ["deleteUser", "updateName"]; // the global sign-in identity (ADR-0023)
     const INFRA = [
       "clampDay",
@@ -89,12 +96,17 @@ describe("tenant isolation", () => {
       "DEFAULT_TENANT_ID",
       "newCertificateId",
       "pageAccess",
+      "flagsFor",
+      "clearFlagCache",
+      "SIGNUP_WINDOW_MS",
     ];
     const exported = [
       accountRepo,
+      analyticsRepo,
       certificateRepo,
       checkpointRepo,
       commerceRepo,
+      flagsRepo,
       progressRepo,
       stateRepo,
       tenantRepo,

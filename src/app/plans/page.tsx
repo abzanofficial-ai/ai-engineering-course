@@ -3,15 +3,20 @@ import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { defaultBranding as brand } from "@/lib/branding";
 import { money, plans, seatPackPrice, yearlySaving } from "@/lib/plans";
+import { flagsFor } from "@/server/repo/flags";
+import { DEFAULT_TENANT_ID } from "@/server/repo/tenant";
 
 export const metadata: Metadata = { title: "Plans" };
+// Reads launch mode (a feature flag, ADR-0031), so it is rendered per request.
+export const dynamic = "force-dynamic";
 
 const per = (interval?: string) =>
   interval === "month" ? "a month" : interval === "year" ? "a year" : "once";
 
 // The three offers (ADR-0030). Prices come from content/plans.json. Checkout arrives with
 // billing (Phase 4); until then every signed-in learner has the full course.
-export default function PlansPage() {
+export default async function PlansPage() {
+  const { launch_open_access: launchOpen } = await flagsFor(DEFAULT_TENANT_ID);
   const l = plans.centreLicence;
   const tiers = plans.seatPack.tiers;
   const saving = yearlySaving();
@@ -21,7 +26,7 @@ export default function PlansPage() {
         <Icon name="back" /> Home
       </Link>
       <h1 style={{ margin: 0, fontSize: "2rem" }}>Plans</h1>
-      {brand.access.launchOpenToAllSignedIn && (
+      {launchOpen && (
         <p className="notice">
           While we launch, every signed-in learner gets the full course free. Paid plans start
           later; we will tell you before anything changes.

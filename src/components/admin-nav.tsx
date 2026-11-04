@@ -3,6 +3,8 @@ import Link from "next/link";
 const ITEMS = [
   { href: "/admin/content", label: "Content" },
   { href: "/admin/commerce", label: "Access and centres" },
+  { href: "/admin/flags", label: "Feature flags" },
+  { href: "/admin/analytics", label: "Analytics" },
 ] as const;
 
 /** Links between the platform owner's screens. */

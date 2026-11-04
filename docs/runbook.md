@@ -68,3 +68,32 @@ DROP TABLE "entitlement"; DROP TABLE "seat_pack"; DROP TABLE "tenant_licence";
 DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrations" ORDER BY created_at DESC LIMIT 1);
 COMMIT;
 ```
+
+## Rolling back migration 0007 (feature flags)
+
+Additive only. Deploy the previous application version first (launch mode then comes from the
+tenant config again), then:
+
+```sql
+BEGIN;
+DROP TABLE "feature_flag";
+DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrations" ORDER BY created_at DESC LIMIT 1);
+COMMIT;
+```
+
+## Rolling back migration 0008 (analytics)
+
+Additive only. Deploy the previous application version first, then:
+
+```sql
+BEGIN;
+DROP TABLE "traffic_daily"; DROP TABLE "signup_source";
+DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrations" ORDER BY created_at DESC LIMIT 1);
+COMMIT;
+```
+
+## Switching launch mode off (when paid plans start)
+
+Sign in as a platform owner, open `/admin/flags`, and choose **Turn off** on "Launch mode". It
+takes effect within 30 seconds; learners already reading keep access until their access pass
+expires (up to 15 minutes). To undo, choose **Turn on** or **Reset to default**.

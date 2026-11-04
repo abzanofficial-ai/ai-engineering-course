@@ -30,7 +30,9 @@ export default defineConfig({
       EMAIL_TRANSPORT: "file",
       AUTH_RATE_LIMIT: "off",
       MAIL_FILE,
-      ADMIN_EMAILS: "owner@example.test",
+      // One owner per admin spec, so parallel tests never share a sign-in (5 links an hour per email).
+      ADMIN_EMAILS:
+        "owner@example.test,owner-content@example.test,owner-flags@example.test,owner-analytics@example.test",
     },
   },
 });
