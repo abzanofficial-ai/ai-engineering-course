@@ -34,7 +34,9 @@ export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const session = getSessionCookie(request);
   // The landing page is for visitors; signed-in learners go straight to their dashboard.
-  if (pathname === "/" && session) return NextResponse.redirect(new URL("/home", request.url));
+  // The query string is kept, so a new learner's source (ADR-0032) reaches the dashboard.
+  if (pathname === "/" && session)
+    return NextResponse.redirect(new URL(`/home${search}`, request.url));
   if (needsSession(pathname, courses) && !session) {
     const url = new URL("/sign-in", request.url);
     url.searchParams.set("next", pathname + search);

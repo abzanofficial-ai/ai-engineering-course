@@ -6,7 +6,7 @@ import { newEmail, signIn } from "./helpers";
 // server, and launch mode affects every learner. Switching is covered in tests/integration/flags.
 test("the owner sees each flag with its state, default and actions", async ({ page, isMobile }) => {
   test.skip(isMobile, "an admin task done on a computer");
-  await signIn(page, "owner@example.test", "/admin/flags");
+  await signIn(page, "owner-flags@example.test", "/admin/flags");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Feature flags");
   await expect(page.getByRole("link", { name: "Feature flags" })).toHaveAttribute(
     "aria-current",

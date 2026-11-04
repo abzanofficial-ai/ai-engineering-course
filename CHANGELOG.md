@@ -4,6 +4,20 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### M5e: Analytics without cookies
+
+- `/admin/analytics` for platform owners (ADR-0032): visits, new learners, active learners and
+  paid or centre places; visits and new learners by source; weekly active learners; chapter
+  start and finish counts; checkpoint pass rates. Counts only.
+- Source tracking from UTM tags or the referring site, kept in memory only (no cookies or
+  device storage). New tables `traffic_daily` and `signup_source` (migration 0008); a
+  learner's source is in their data export and deleted with their account.
+- How to tag links for posts and ads: `docs/tracking-links.md`.
+
+#### Fixed
+
+- Signed-in learners redirected from `/` to `/home` kept no query string; it is now kept.
+
 ### M5d: Feature flags
 
 - Feature flags per tenant (ADR-0031): declared in `src/lib/flags.ts`, overrides stored in the

@@ -476,3 +476,34 @@ export const featureFlag = pgTable(
   },
   (t) => [primaryKey({ columns: [t.tenantId, t.key] })],
 );
+
+// ---------------------------------------------------------------------------
+// Analytics (ADR-0032). Aggregates only: no cookies, no IP addresses, no page-by-page trails.
+
+/** Visits by day and source (UTM or referring site). Counters, not records of people. */
+export const trafficDaily = pgTable(
+  "traffic_daily",
+  {
+    tenantId: tenantRef(),
+    day: date("day", { mode: "string" }).notNull(),
+    source: text("source").notNull(),
+    medium: text("medium").notNull().default(""),
+    campaign: text("campaign").notNull().default(""),
+    visits: integer("visits").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.tenantId, t.day, t.source, t.medium, t.campaign] })],
+);
+
+/** Where a learner first came from when they signed up; deleted with their account. */
+export const signupSource = pgTable(
+  "signup_source",
+  {
+    tenantId: tenantRef(),
+    userId: userRef(),
+    source: text("source").notNull(),
+    medium: text("medium").notNull().default(""),
+    campaign: text("campaign").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.tenantId, t.userId] })],
+);

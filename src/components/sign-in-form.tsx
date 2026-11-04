@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { withSource } from "@/lib/attribution";
 import { authClient } from "@/lib/auth-client";
+import { currentSource } from "./attribution";
 
 export function SignInForm({ next, google }: { next: string; google: boolean }) {
   const [email, setEmail] = useState("");
@@ -31,7 +33,8 @@ export function SignInForm({ next, google }: { next: string; google: boolean }) 
           setState("sending");
           const res = await authClient.signIn.magicLink({
             email,
-            callbackURL: next,
+            // The source travels on the link, so it survives opening the email on another device.
+            callbackURL: withSource(next, currentSource()),
             errorCallbackURL: `/sign-in?error=link&next=${encodeURIComponent(next)}`,
           });
           if (res.error) {
@@ -73,7 +76,12 @@ export function SignInForm({ next, google }: { next: string; google: boolean }) 
           <button
             type="button"
             className="btn"
-            onClick={() => authClient.signIn.social({ provider: "google", callbackURL: next })}
+            onClick={() =>
+              authClient.signIn.social({
+                provider: "google",
+                callbackURL: withSource(next, currentSource()),
+              })
+            }
           >
             Continue with Google
           </button>

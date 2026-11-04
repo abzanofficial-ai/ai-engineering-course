@@ -9,7 +9,7 @@ export function newEmail(tag: string): string {
   return `${tag}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@example.test`;
 }
 
-async function magicLinkFor(email: string): Promise<string> {
+export async function magicLinkFor(email: string): Promise<string> {
   for (let i = 0; i < 50; i++) {
     if (existsSync(MAIL_FILE)) {
       const lines = readFileSync(MAIL_FILE, "utf8").trim().split("\n").filter(Boolean);

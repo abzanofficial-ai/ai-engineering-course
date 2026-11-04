@@ -81,6 +81,17 @@ DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrati
 COMMIT;
 ```
 
+## Rolling back migration 0008 (analytics)
+
+Additive only. Deploy the previous application version first, then:
+
+```sql
+BEGIN;
+DROP TABLE "traffic_daily"; DROP TABLE "signup_source";
+DELETE FROM "__drizzle_migrations" WHERE id = (SELECT id FROM "__drizzle_migrations" ORDER BY created_at DESC LIMIT 1);
+COMMIT;
+```
+
 ## Switching launch mode off (when paid plans start)
 
 Sign in as a platform owner, open `/admin/flags`, and choose **Turn off** on "Launch mode". It

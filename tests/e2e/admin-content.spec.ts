@@ -13,7 +13,7 @@ test("owner previews a new handbook export and is shown how to publish it", asyn
 }) => {
   test.skip(isMobile, "an admin task done on a computer");
   test.setTimeout(120_000);
-  await signIn(page, "owner@example.test", "/admin/content");
+  await signIn(page, "owner-content@example.test", "/admin/content");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Content");
   await page.getByLabel("Handbook file (.md)").setInputFiles({
     name: "handbook.md",
