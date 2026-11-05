@@ -19,13 +19,13 @@ export function LearnHeader({ titles }: { titles: string[] }) {
       <div className="mode-head">
         <Icon name="learn" />
         <h2>Learn</h2>
-        {status === "ready" ? (
+        {status !== "loading" ? (
           <span className="muted small" style={{ marginLeft: "auto" }}>
             {pct}% read
           </span>
         ) : null}
       </div>
-      {status === "ready" && (
+      {status !== "loading" && (
         <div className="bar-track" aria-hidden="true">
           <div className="bar-fill" style={{ width: `${pct}%` }} />
         </div>
@@ -110,14 +110,14 @@ export function LearnPager({
           <Icon name="check" />
         </div>
         <h3 id="chapter-done-h" ref={heading} tabIndex={-1}>
-          {status === "ready" && unread.length === 0 ? "Chapter complete" : "End of this chapter"}
+          {status !== "loading" && unread.length === 0 ? "Chapter complete" : "End of this chapter"}
         </h3>
         <p>
-          {status !== "ready"
-            ? "Create a free account to save your reading and earn XP."
-            : unread.length === 0
-              ? `You've read all ${learnKeys.length} sections.`
-              : `${unread.length} earlier section${unread.length === 1 ? " isn't" : "s aren't"} marked as read yet.`}
+          {unread.length === 0
+            ? `You've read all ${learnKeys.length} sections.`
+            : `${unread.length} earlier section${unread.length === 1 ? " isn't" : "s aren't"} marked as read yet.`}
+          {status === "anon" &&
+            " Saved on this device: create a free account to keep it on every device and earn XP."}
         </p>
         <div className="chapter-done-actions">
           {next && (
@@ -125,7 +125,7 @@ export function LearnPager({
               Next: {next.title} <Icon name="arrow" />
             </Link>
           )}
-          {status === "ready" && firstUnread >= 0 && (
+          {status !== "loading" && firstUnread >= 0 && (
             <button
               type="button"
               className="btn"

@@ -14,6 +14,7 @@ import {
 } from "react";
 import { localDay } from "@/lib/dates";
 import { applyLocal, emptyState, type LearnerState } from "@/lib/learner-state";
+import { enqueue, GUEST_MAX_OPS, GUEST_PROMPT_TYPES, GUEST_TYPES } from "@/lib/guest-progress";
 import type { Op, OpInput, OpResult } from "@/lib/ops-schema";
 
 type Status = "loading" | "anon" | "ready";
@@ -21,6 +22,8 @@ export type SaveStatus = "saved" | "saving" | "offline";
 
 interface LearnerContext {
   status: Status;
+  /** Progress is known and shown: signed in, or a visitor whose progress is kept on this device. */
+  tracking: boolean;
   user: { name: string; email: string; platformRole: string | null } | null;
   state: LearnerState;
   save: SaveStatus;
@@ -77,6 +80,11 @@ export function LearnerProvider({ course, children }: { course: string; children
   const [user, setUser] = useState<LearnerContext["user"]>(null);
   const [server, setServer] = useState<LearnerState>(emptyState);
   const [pending, setPending] = useState<Op[]>([]);
+  const [guest, setGuest] = useState<Op[]>([]);
+  const guestKey = `outbox:${course}:guest`;
+  // Actions taken before we know whether the reader is signed in; replayed once we do.
+  const early = useRef<Op[]>([]);
+  const prompted = useRef(false);
   const [save, setSave] = useState<SaveStatus>("saved");
   const [promptAccount, setPrompt] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
@@ -93,7 +101,13 @@ export function LearnerProvider({ course, children }: { course: string; children
     timer.current = setTimeout(() => void flushRef.current(), ms);
   };
 
-  const state = useMemo(() => pending.reduce(applyLocal, server), [server, pending]);
+  const state = useMemo(
+    () =>
+      status === "anon"
+        ? guest.reduce(applyLocal, emptyState())
+        : pending.reduce(applyLocal, server),
+    [status, guest, server, pending],
+  );
 
   const setPendingBoth = useCallback((ops: Op[]) => {
     pendingRef.current = ops;
@@ -106,6 +120,18 @@ export function LearnerProvider({ course, children }: { course: string; children
     setToasts((t) => [...t.slice(-2), { id, text }]);
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2200);
   }, []);
+
+  /** Not signed in: show and keep this device's progress for the public pages. */
+  const becomeGuest = useCallback(() => {
+    const ops = early.current.filter((o) => GUEST_TYPES.has(o.type));
+    early.current = [];
+    let next = storage.read<Op[]>(guestKey, []);
+    for (const o of ops) next = enqueue(next, o, GUEST_MAX_OPS);
+    storage.write(guestKey, next);
+    setGuest(next);
+    setUser(null);
+    setStatus("anon");
+  }, [guestKey]);
 
   const flush = useCallback(
     async (keepalive = false) => {
@@ -125,8 +151,8 @@ export function LearnerProvider({ course, children }: { course: string; children
           keepalive,
         });
         if (res.status === 401) {
-          setStatus("anon");
-          setUser(null);
+          // Signed out elsewhere: the queue stays in this learner's outbox for their next sign-in.
+          becomeGuest();
           return;
         }
         if (!res.ok && res.status !== 400) throw new Error(String(res.status));
@@ -148,7 +174,7 @@ export function LearnerProvider({ course, children }: { course: string; children
       }
       if (pendingRef.current.length) retry(300);
     },
-    [course, setPendingBoth, toast],
+    [course, setPendingBoth, toast, becomeGuest],
   );
 
   useEffect(() => {
@@ -165,8 +191,7 @@ export function LearnerProvider({ course, children }: { course: string; children
         { cache: "no-store" },
       );
       if (res.status === 401) {
-        setStatus("anon");
-        setUser(null);
+        becomeGuest();
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
@@ -176,22 +201,32 @@ export function LearnerProvider({ course, children }: { course: string; children
       snapshotKey.current = `snapshot:${course}:${body.user.email}`;
       storage.write(`lastUser:${course}`, body.user);
       storage.write(snapshotKey.current, body.state);
-      const queued = storage.read<Op[]>(outboxKey.current, []);
+      // Progress made on this device before signing in moves into the account (oldest first).
+      const fromGuest = storage.read<Op[]>(guestKey, []);
+      storage.write(guestKey, null);
+      setGuest([]);
+      const queued = [...fromGuest, ...storage.read<Op[]>(outboxKey.current, []), ...early.current];
+      early.current = [];
+      storage.write(outboxKey.current, queued);
       setUser(body.user);
       setServer(body.state);
       pendingRef.current = queued;
       setPending(queued);
       setStatus("ready");
+      if (fromGuest.some((o) => o.type !== "position"))
+        toast("Your progress from this device has been added to your account");
       if (queued.length) void flushRef.current();
     } catch {
       // Offline: show the last known state for the last signed-in learner and keep queueing.
       if (!remembered) {
-        setStatus("anon");
+        becomeGuest();
         return;
       }
       outboxKey.current = `outbox:${course}:${remembered.email}`;
       snapshotKey.current = `snapshot:${course}:${remembered.email}`;
-      const queued = storage.read<Op[]>(outboxKey.current, []);
+      const queued = [...storage.read<Op[]>(outboxKey.current, []), ...early.current];
+      early.current = [];
+      storage.write(outboxKey.current, queued);
       setUser(remembered);
       // Snapshots saved by an older version lack newer fields.
       setServer({
@@ -203,7 +238,7 @@ export function LearnerProvider({ course, children }: { course: string; children
       setSave("offline");
       setStatus("ready");
     }
-  }, [course]);
+  }, [course, guestKey, toast, becomeGuest]);
 
   useEffect(() => {
     // Defer to after mount so the server-rendered markup hydrates first.
@@ -229,22 +264,35 @@ export function LearnerProvider({ course, children }: { course: string; children
 
   const dispatch = useCallback(
     (op: OpInput) => {
-      if (status !== "ready") {
-        // Paging through Learn is free for visitors; ticks, answers and ratings need an account.
-        if (op.type !== "position" && op.type !== "section_read") setPrompt(true);
+      const full = { ...op, ts: Date.now() } as Op;
+      if (status === "loading") {
+        early.current = enqueue(early.current, full, GUEST_MAX_OPS);
         return;
       }
-      const full = { ...op, ts: Date.now() } as Op;
+      if (status === "anon") {
+        // Visitors keep their reading, ticks and answers on this device until they sign in.
+        // Anything else (ratings, notes, bookmarks, goals) needs an account.
+        if (!GUEST_TYPES.has(full.type)) {
+          setPrompt(true);
+          return;
+        }
+        setGuest((g) => {
+          const next = enqueue(g, full, GUEST_MAX_OPS);
+          storage.write(guestKey, next);
+          return next;
+        });
+        if (GUEST_PROMPT_TYPES.has(full.type) && !prompted.current) {
+          prompted.current = true;
+          setPrompt(true);
+        }
+        return;
+      }
       // Positions overwrite each other; keep only the latest in the queue.
-      const rest =
-        full.type === "position"
-          ? pendingRef.current.filter((o) => o.type !== "position")
-          : pendingRef.current;
-      setPendingBoth([...rest, full]);
+      setPendingBoth(enqueue(pendingRef.current, full));
       setSave(typeof navigator !== "undefined" && !navigator.onLine ? "offline" : "saving");
       retry(full.type === "position" ? 1500 : 400);
     },
-    [status, setPendingBoth],
+    [status, setPendingBoth, guestKey],
   );
 
   const acceptServerState = useCallback((s: LearnerState) => {
@@ -255,6 +303,7 @@ export function LearnerProvider({ course, children }: { course: string; children
   const value = useMemo<LearnerContext>(
     () => ({
       status,
+      tracking: status !== "loading",
       user,
       state,
       save,

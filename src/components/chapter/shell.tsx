@@ -129,7 +129,7 @@ export function ChapterShell({
   // Opening a chapter records it as the place to continue from.
   const recorded = useRef(false);
   useEffect(() => {
-    if (recorded.current || status !== "ready") return;
+    if (recorded.current || status === "loading") return;
     recorded.current = true;
     dispatch({ type: "position", page: pageKey, mode: initial.mode, index: initial.index });
   }, [status, dispatch, pageKey, initial]);
@@ -184,7 +184,7 @@ function ModeTabs() {
         >
           <Icon name={m} />
           <span>{LABEL[m]}</span>
-          <small>{status === "ready" ? label[m] : " "}</small>
+          <small>{status !== "loading" ? label[m] : " "}</small>
         </button>
       ))}
     </div>
@@ -292,8 +292,8 @@ export function ModePanel({ mode, children }: { mode: Mode; children: ReactNode 
 
 export function ChapterPercent() {
   const { spec } = useChapter();
-  const { state, status } = useLearner();
-  if (status !== "ready") return null;
+  const { state, tracking } = useLearner();
+  if (!tracking) return null;
   const pct = pageProgress(spec, state);
   return (
     <div className="ch-pct">
@@ -308,7 +308,14 @@ export function ChapterPercent() {
 
 export function SaveStatus() {
   const { status, save } = useLearner();
-  if (status !== "ready") return null;
+  if (status === "loading") return null;
+  if (status === "anon")
+    return (
+      <span className="save-status" aria-live="polite">
+        <Icon name="check" />
+        Saved on this device
+      </span>
+    );
   const text = save === "saved" ? "Saved" : save === "saving" ? "Saving…" : "Offline: will sync";
   return (
     <span className="save-status" aria-live="polite">

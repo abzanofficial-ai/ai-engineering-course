@@ -14,7 +14,7 @@ const vars = (v: Record<string, string | number>) => v as CSSProperties;
 
 /** Course home: hero with live progress, then the route of parts (design-system §5.1). */
 export function RouteView({ data }: { data: RouteData }) {
-  const { status, state } = useLearner();
+  const { status, state, tracking } = useLearner();
   const signedIn = status === "ready";
   const allPages = data.parts.flatMap((p) => p.pages);
   const published = allPages.filter((p) => p.status === "published");
@@ -135,8 +135,9 @@ export function RouteView({ data }: { data: RouteData }) {
         )}
         {status === "anon" ? (
           <p className="small">
-            <Link href="/sign-in">Create a free account</Link> to save your progress, earn XP and
-            keep a streak.
+            Your progress on the free chapters is saved on this device.{" "}
+            <Link href="/sign-in">Create a free account</Link> to keep it on every device, earn XP
+            and keep a streak.
           </p>
         ) : null}
         <p className="small route-tools">
@@ -180,7 +181,7 @@ export function RouteView({ data }: { data: RouteData }) {
                       You can now: <span dangerouslySetInnerHTML={{ __html: part.outcomeHtml }} />
                     </p>
                   )}
-                  {live.length > 0 && signedIn && (
+                  {live.length > 0 && tracking && (
                     <p className="outcome">
                       <span className="pct">{pct}%</span> complete
                       {part.number
@@ -224,7 +225,7 @@ export function RouteView({ data }: { data: RouteData }) {
                               <br />
                               <span className="meta">{meta.join(" · ")}</span>
                             </span>
-                            {signedIn ? (
+                            {tracking ? (
                               <span
                                 className={`mini${pr === 100 ? " done" : ""}`}
                                 role="img"
