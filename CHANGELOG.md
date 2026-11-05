@@ -4,6 +4,16 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Fixed: visitors' progress
+
+- Signed-out readers' "Mark as read", lab ticks and drill answers on the public pages were
+  not saved. They are now kept on the device (shown as "Saved on this device") and move into
+  the learner's account when they sign up (ADR-0033). Sign-out clears them.
+- Actions taken while the app is still checking sign-in are no longer dropped.
+- New e2e suite `tests/e2e/progress.spec.ts`: signed out (each public page, Chapter 1 lab and
+  untick, home, blocked storage), signing up and on another device, sign-out on a shared
+  device, and signed in for the first chapter of every part, re-reading and skipping.
+
 ### M5e: Analytics without cookies
 
 - `/admin/analytics` for platform owners (ADR-0032): visits, new learners, active learners and

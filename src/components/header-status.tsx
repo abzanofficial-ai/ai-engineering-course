@@ -41,7 +41,10 @@ export function AccountPrompt() {
     <div className="account-prompt" role="dialog" aria-modal="false" aria-labelledby="ap-title">
       <div>
         <strong id="ap-title">Save your progress</strong>
-        <p>Create a free account to keep your ticks, answers, XP and streak on every device.</p>
+        <p>
+          It&apos;s saved on this device for now. Create a free account to keep your progress on
+          every device and earn XP and a streak.
+        </p>
       </div>
       <div className="ap-actions">
         <Link className="btn primary" href={`/sign-in?next=${encodeURIComponent(next)}`}>

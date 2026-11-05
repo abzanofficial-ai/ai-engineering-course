@@ -18,7 +18,7 @@ test("signed out, home lists the course and starts it on its learning path", asy
   const card = page.getByRole("article", { name: "The AI Engineering Handbook" });
   await expect(card.getByText("Beginner → Job Ready")).toBeVisible();
   await expect(card).toContainText("29 chapters ready");
-  await expect(card.getByRole("progressbar")).toHaveCount(0);
+  await expect(card.getByRole("progressbar")).toHaveCount(0); // nothing started yet
   // Wide screens add a side list (with Certificates); phones use the bottom tab bar instead.
   if (!isMobile)
     await expect(page.getByRole("navigation", { name: "Your learning" })).toContainText(

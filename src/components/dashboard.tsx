@@ -36,6 +36,8 @@ function useCourseState(slug: string, providerCourse: string): LearnerState | nu
       live = false;
     };
   }, [own, slug, status]);
+  // Visitors see the progress kept on this device for the default course.
+  if (status === "anon") return own ? state : null;
   if (status !== "ready") return null;
   return own ? state : other;
 }
@@ -74,6 +76,7 @@ function CourseCard({
   providerCourse: string;
 }) {
   const state = useCourseState(course.slug, providerCourse);
+  const { status } = useLearner();
   const pct = state ? courseProgress(course.parts, state) : 0;
   const lastSlug = state?.last ? course.slugs[state.last.pageKey] : undefined;
   const started = Boolean(state && (pct > 0 || lastSlug));
@@ -94,7 +97,8 @@ function CourseCard({
           {course.counts.chapters} chapters ready · {course.counts.labs} labs
           {course.counts.comingSoon > 0 && ` · ${course.counts.comingSoon} coming soon`}
         </p>
-        {state && (
+        {/* Visitors see a bar once they've started (their progress is kept on this device). */}
+        {state && (status === "ready" || started) && (
           <div className="course-progress">
             <div
               className="bar-track"
@@ -178,7 +182,7 @@ export function Dashboard({
   providerCourse: string;
   intro: string;
 }) {
-  const { status, state, user } = useLearner();
+  const { status, state, user, tracking } = useLearner();
   const signedIn = status === "ready";
   const [deleted, setDeleted] = useState(false);
   useEffect(() => {
@@ -348,7 +352,7 @@ export function Dashboard({
                         {spec.learn.length} sections
                         {spec.labs.length > 0 &&
                           ` · ${spec.labs.length} lab${spec.labs.length === 1 ? "" : "s"}`}
-                        {signedIn && v > 0 ? ` · ${v}%` : ""}
+                        {tracking && v > 0 ? ` · ${v}%` : ""}
                       </span>
                     </span>
                     <Icon name="arrow" />

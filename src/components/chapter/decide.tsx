@@ -28,7 +28,13 @@ export function DrillPanel({ reveal }: { reveal: ReactNode }) {
         <label htmlFor="drill-answer">
           <strong>Your answer</strong>{" "}
           <span className="muted small">
-            (private{status === "ready" ? ", saved as you type" : ""})
+            (private
+            {status === "ready"
+              ? ", saved as you type"
+              : status === "anon"
+                ? ", saved on this device"
+                : ""}
+            )
           </span>
         </label>
         <p className="muted small" style={{ margin: "4px 0 10px" }}>
@@ -42,7 +48,7 @@ export function DrillPanel({ reveal }: { reveal: ReactNode }) {
           onChange={(e) => {
             const v = e.target.value;
             setAnswer(v);
-            if (status === "ready") {
+            if (status !== "loading") {
               if (debounce.current) clearTimeout(debounce.current);
               debounce.current = setTimeout(() => persist(v, false), 800);
             }

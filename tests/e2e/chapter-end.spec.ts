@@ -39,7 +39,8 @@ test("signed out, the end of a public chapter still shows what is next", async (
   await page.goto(`${GUIDE}#${LAST}`);
   await page.getByRole("button", { name: "Mark as read" }).click();
   const done = page.getByRole("region", { name: "End of this chapter" });
-  await expect(done).toContainText("Create a free account");
+  // A visitor's reading is kept on this device; the card says so and offers an account.
+  await expect(done).toContainText("Saved on this device: create a free account");
   await expect(done.getByRole("link", { name: "Back to the course" })).toHaveAttribute(
     "href",
     COURSE,
